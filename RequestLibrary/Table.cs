@@ -8,24 +8,21 @@ namespace RequestLibrary
 {
     class Table
     {
-
-        public enum state { available, inPayment };
-
         public Int16 TableNr { get; private set; }
-        public int TblState;
+        public TableStateID TblState;
         List<RequestLine> requests;
         Product product;
 
         public Table(Int16 tblNr)
         {
-            TblState = (int) state.available;
+            TblState = TableStateID.Available;
             TableNr = tblNr;
         }
 
 
         public bool insertNewRequest(RequestLine rq)
         {
-            if ((int)state.inPayment == TblState)
+            if (TableStateID.Paying == TblState)
                 return false;
 
             requests.Add(rq);
@@ -34,7 +31,7 @@ namespace RequestLibrary
 
         public void changeState()
         {
-            TblState = (TblState == (int)state.available) ? (int)state.inPayment : (int)state.available;
+            TblState = (TblState == TableStateID.Available) ? TableStateID.Paying : TableStateID.Available;
         }
 
         public override string ToString()
