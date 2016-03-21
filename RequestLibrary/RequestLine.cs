@@ -2,21 +2,21 @@
 
 namespace RequestLibrary
 {
-    public class RequestLine
+    public class RequestLine : MarshalByRefObject
     {
         public Product Prod { get; protected set; }
         public int Qtt { get; protected set; }
-        public int RequestNr { get; set; }
+        public short RequestNr { get; set; }
         public string Description { get; private set; }
-        public RequestState RState{get;set;}
-        public int TableNr { get; set;}
+        public RequestState RState { get; set; }
+        public int TableNr { get; set; }
 
-        public RequestLine(Product prod, int qtt, Int16 tblNr, string desc)
+        public RequestLine(short requestNr, Product prod, int qtt, Int16 tblNr, string desc)
         {
             Prod = prod;
             Qtt = qtt;
             TableNr = tblNr;
-            RequestNr = -1;
+            RequestNr = requestNr;
 
             if (desc != null)
                 Description = desc;
@@ -27,7 +27,7 @@ namespace RequestLibrary
 
         public bool changeState()
         {
-            switch(RState)
+            switch (RState)
             {
                 case RequestState.Waiting:
                     RState = RequestState.InProgress;
@@ -42,7 +42,7 @@ namespace RequestLibrary
 
         public override string ToString()
         {
-            return $"{Prod.ToString(), 10} {Qtt, 3} {TableNr, 2}";
+            return $"{Prod.ToString(),10} {Qtt,3} {TableNr,2}";
         }
     }
 }

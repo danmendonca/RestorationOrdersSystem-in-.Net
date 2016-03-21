@@ -1,2 +1,11 @@
 c:\users\asmen\documents\visual studio 2015\Projects\udemy\RestorationOrderSystem\RestorationOrderSystem\bin\Debug\RestorationOrderSystem.exe.config
 C:\Users\asmen\Documents\Visual Studio 2015\Projects\RestorationOrderSystem\RestorationOrderSystem\bin\Debug\RestorationOrderSystem.exe.config
+C:\Users\asmen\Documents\Visual Studio 2015\Projects\RestorationOrderSystem\RestorationOrderSystem\bin\Debug\RestorationOrderSystem.exe
+C:\Users\asmen\Documents\Visual Studio 2015\Projects\RestorationOrderSystem\RestorationOrderSystem\bin\Debug\RestorationOrderSystem.pdb
+C:\Users\asmen\Documents\Visual Studio 2015\Projects\RestorationOrderSystem\RestorationOrderSystem\bin\Debug\ClassLibrary1.dll
+C:\Users\asmen\Documents\Visual Studio 2015\Projects\RestorationOrderSystem\RestorationOrderSystem\bin\Debug\ClassLibrary1.pdb
+C:\Users\asmen\Documents\Visual Studio 2015\Projects\RestorationOrderSystem\RestorationOrderSystem\obj\Debug\RestorationOrderSystem.csprojResolveAssemblyReference.cache
+C:\Users\asmen\Documents\Visual Studio 2015\Projects\RestorationOrderSystem\RestorationOrderSystem\obj\Debug\RestorationOrderSystem.Properties.Resources.resources
+C:\Users\asmen\Documents\Visual Studio 2015\Projects\RestorationOrderSystem\RestorationOrderSystem\obj\Debug\RestorationOrderSystem.csproj.GenerateResource.Cache
+C:\Users\asmen\Documents\Visual Studio 2015\Projects\RestorationOrderSystem\RestorationOrderSystem\obj\Debug\RestorationOrderSystem.exe
+C:\Users\asmen\Documents\Visual Studio 2015\Projects\RestorationOrderSystem\RestorationOrderSystem\obj\Debug\RestorationOrderSystem.pdb

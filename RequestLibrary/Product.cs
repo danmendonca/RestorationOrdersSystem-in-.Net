@@ -1,5 +1,7 @@
 ﻿namespace RequestLibrary
 {
+
+    [System.Serializable]
     public class Product
     {
         public string Name { get; protected set; }

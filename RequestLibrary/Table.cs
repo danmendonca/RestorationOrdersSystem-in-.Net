@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RequestLibrary
 {
-    class Table
+    public class Table
     {
         public Int16 TableNr { get; private set; }
-        public TableStateID TblState;
-        List<RequestLine> requests;
+        public TableStateID TblState {get; private set;}
+        protected List<RequestLine> requests;
         Product product;
 
         public Table(Int16 tblNr)
