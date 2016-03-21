@@ -5,9 +5,9 @@ VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csproj", "{27F2B2DF-B076-4D33-A7D3-4DB470D7D994}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Server", "Server\Server.csproj", "{2A45168D-4962-436D-9C96-EADBE2326E5D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RegisterServer", "Server\RegisterServer.csproj", "{2A45168D-4962-436D-9C96-EADBE2326E5D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client", "Client\Client.csproj", "{B9772FF6-B265-4497-825C-5275E3DA0AB3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RoomService", "Client\RoomService.csproj", "{B9772FF6-B265-4497-825C-5275E3DA0AB3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
