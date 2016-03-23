@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.Remoting;
+using System.Threading;
 
 class Server
 {
@@ -15,13 +16,17 @@ class Server
 
 public class SingleServer : MarshalByRefObject, ISingleServer
 {
-    private static short NR_OF_TABLES = 8;
+    private static ushort NR_OF_TABLES = 8;
     Hashtable table = new Hashtable();
     private List<Product> products = new List<Product>();
-    short NrTables { get; set; }
-    short NrRequests { get; set; }
+    ushort NrTables { get; set; }
+    ushort NrRequests { get; set; }
     Table[] tables;
+    List<List<RequestLine>> bills = new List<List<RequestLine>>();
 
+    public event RequestReadyDelegate requestReadyEvent;
+    public event BarRequestDelegate barRequestEvent;
+    public event RestaurantDelegate restaurantRequestEvent;
 
     public SingleServer()
     {
@@ -34,27 +39,41 @@ public class SingleServer : MarshalByRefObject, ISingleServer
     private void CreateTables()
     {
         tables = new Table[NrTables];
-        for (short i = 0; i < NrTables; i++) tables[(int)i] = new Table(i);
+        for (ushort i = 0; i < NrTables; i++) tables[(int)i] = new Table(i);
     }
 
     public void ChangeRequestState(RequestLine rl)
     {
+        if (requestReadyEvent == null)
+            return;
+
+        Delegate[] invkList = requestReadyEvent.GetInvocationList();
+        foreach (RequestReadyDelegate handler in invkList)
+        {
+            new Thread(() =>
+            {
+                try
+                {
+                    handler(rl);
+                }
+                catch (Exception)
+                {
+                    requestReadyEvent -= handler;
+                }
+            }).Start();
+        }
+
         throw new NotImplementedException();
     }
 
-    public void ClientAddress(Guid guid, string address)
+    public void ClientAddress(string address)    //TODO guid and address are not necessary as we are using event subscribers
     {
-
-        if (!table.ContainsKey(guid))
-            table.Add(guid, address);
-
         IRoomService rem = (IRoomService)RemotingServices.Connect(typeof(IRoomService), address);
         rem.SetProducts(products);
         rem.SetNrTables(NrTables);
-        Console.WriteLine("[SingleServer]: Registered " + address);
     }
 
-    public void MakeRequest(short tableNr, short p, short qtty, string dsc)
+    public void MakeRequest(ushort tableNr, ushort p, ushort qtty, string dsc)
     {
         if (tableNr > NrTables || tables[tableNr].TblState != TableStateID.Available)
             return;
@@ -65,19 +84,15 @@ public class SingleServer : MarshalByRefObject, ISingleServer
         Console.WriteLine($"Added new request to table {rl.TableNr} for {rl.Qtt} of {products[p]}");
     }
 
-    public bool RequestBill(short t)
+    public bool RequestBill(ushort t)
     {
-        throw new NotImplementedException();
-    }
+        if (t > NrTables || tables[t].TblState != TableStateID.Available)
+            return false;
 
-    public void SomeCall(Guid guid)
-    {
-        if (table.ContainsKey(guid))
-        {
-            IRoomService rem = (IRoomService)RemotingServices.Connect(typeof(IRoomService), (string)table[guid]); //reference to the client remote obj
-            Console.WriteLine("[SingleServer]: Obtained the client remote object");
-            rem.SomeMessage("Server calling Client");
-        }
+        tables[t].changeState();
+        bills.Add(tables[t].getRequests());
+
+        return true;
     }
 
     private void CreateProducts()
@@ -99,5 +114,15 @@ public class SingleServer : MarshalByRefObject, ISingleServer
         products.Add(p6);
         Product p7 = new Product("RedBull", 1.7f, PreparationRoomID.Bar);
         products.Add(p7);
+    }
+
+    public void PayTable(ushort t)
+    {
+        if (t > NrTables || tables[t].TblState != TableStateID.Paying)
+            return;
+
+        bills.Add(tables[t].getRequests());
+        tables[t].changeState();
+        tables[t].ClearRequests();
     }
 }

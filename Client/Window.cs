@@ -9,8 +9,9 @@ public partial class Window : Form
     int port;
     Guid guid;
     ISingleServer server;
-    public List<Product> ps { get; private set; }
-    short nrTables;
+    private List<Product> ps { get; private set; }
+    private List<RequestLine> toDeliver = new List<RequestLine>(); 
+    ushort nrTables;
 
     public Window(int myPort)
     {
@@ -26,35 +27,35 @@ public partial class Window : Form
 
     private void buttonConnect_Click(object sender, EventArgs e)
     {
-        server.ClientAddress(guid, "tcp://localhost:" + port.ToString() + "/Message");
+        server.ClientAddress("tcp://localhost:" + port.ToString() + "/Message");
     }
 
     private void buttonMkReq_Click(object sender, EventArgs e)
     {
         string dsc = textBoxDescription.Text;
-        short tblNr = (short)comboBoxTable.SelectedIndex;
-        short pIndex = (short)comboBoxProduct.SelectedIndex;
-        short qtt = (short)spinnerQuantity.Value;
-        server.MakeRequest((short) comboBoxTable.SelectedIndex, (short) comboBoxProduct.SelectedIndex, (short)spinnerQuantity.Value, textBoxDescription.Text);
-       // short s = 2;
+        ushort tblNr = (ushort)comboBoxTable.SelectedIndex;
+        ushort pIndex = (ushort)comboBoxProduct.SelectedIndex;
+        ushort qtt = (ushort)spinnerQuantity.Value;
+        server.MakeRequest((ushort)comboBoxTable.SelectedIndex, (ushort)comboBoxProduct.SelectedIndex, (ushort)spinnerQuantity.Value, textBoxDescription.Text);
+        // ushort s = 2;
         //server.MakeRequest(s, ps[2], s, "");
         textBoxReadyReq.Text += ("Calling Server ..." + Environment.NewLine);
-        server.SomeCall(guid);
+
         //ps= server.GetProducts();
     }
 
     public void AddMessage(string message)
     {
-        if (InvokeRequired)                                               // I'm not in UI thread
-            BeginInvoke((MethodInvoker)delegate { AddMessage(message); });  // Invoke using an anonymous delegate
+        if (InvokeRequired)
+            BeginInvoke((MethodInvoker)delegate { AddMessage(message); });
         else
             textBoxReadyReq.Text += (message + Environment.NewLine);
     }
 
     public void SetListProducts(List<Product> lp)
     {
-        if (InvokeRequired)                                               // I'm not in UI thread
-            BeginInvoke((MethodInvoker)delegate { SetListProducts(lp); });  // Invoke using an anonymous delegate
+        if (InvokeRequired)
+            BeginInvoke((MethodInvoker)delegate { SetListProducts(lp); });
         else
         {
             ps = lp;
@@ -62,18 +63,33 @@ public partial class Window : Form
             foreach (Product p in lp) comboBoxProduct.Items.Add(p);
         }
     }
-    public void SetNrTables(short nrTables)
+    public void SetNrTables(ushort nrTables)
     {
 
-        if (InvokeRequired)                                               // I'm not in UI thread
-            BeginInvoke((MethodInvoker)delegate { SetNrTables(nrTables); });  // Invoke using an anonymous delegate
+        if (InvokeRequired)
+            BeginInvoke((MethodInvoker)delegate { SetNrTables(nrTables); });
         else
         {
             this.nrTables = nrTables;
             comboBoxTable.Items.Clear();
-            for (short i = 0; i < nrTables; i++) comboBoxTable.Items.Add($"Mesa {i.ToString(),2}");
+            for (ushort i = 0; i < nrTables; i++) comboBoxTable.Items.Add($"Mesa {i.ToString(),2}");
         }
-        //throw new NotImplementedException();
+    }
+
+    public void AddRequestState(RequestLine rl)
+    {
+        if (InvokeRequired)
+            BeginInvoke((MethodInvoker)delegate { AddRequestState(rl); });
+        else
+            textBoxReadyReq.Text += (rl.ToString() + Environment.NewLine);
+    }
+
+    public void deliverRequest(RequestLine rl)
+    {
+        if (InvokeRequired)
+            BeginInvoke((MethodInvoker)delegate { AddMessage(message); });
+        else
+            textBoxReadyReq.Text += (message + Environment.NewLine);
     }
 }
 
@@ -108,7 +124,7 @@ public class RemMessage : MarshalByRefObject, IRoomService
 {
     private Window win;
 
-    public void SetNrTables(short nrTbls)
+    public void SetNrTables(ushort nrTbls)
     {
         win.SetNrTables(nrTbls);
     }

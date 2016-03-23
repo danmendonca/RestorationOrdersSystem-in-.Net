@@ -29,14 +29,14 @@ public class Product
 
 public class RequestLine : MarshalByRefObject
 {
-    public short Prod { get; protected set; }
+    public ushort Prod { get; protected set; }
     public int Qtt { get; protected set; }
-    public short RequestNr { get; set; }
+    public ushort RequestNr { get; set; }
     public string Description { get; private set; }
     public RequestState RState { get; set; }
     public int TableNr { get; set; }
 
-    public RequestLine(short requestNr, short prodIndex, int qtt, short tblNr, string desc)
+    public RequestLine(ushort requestNr, ushort prodIndex, int qtt, ushort tblNr, string desc)
     {
         Prod = prodIndex;
         Qtt = qtt;
@@ -74,11 +74,11 @@ public class RequestLine : MarshalByRefObject
 
 public class Table
 {
-    public short TableNr { get; private set; }
+    public ushort TableNr { get; private set; }
     public TableStateID TblState { get; private set; }
     protected List<RequestLine> requests = new List<RequestLine>();
 
-    public Table(Int16 tblNr)
+    public Table(ushort tblNr)
     {
         TblState = TableStateID.Available;
         TableNr = tblNr;
@@ -103,23 +103,43 @@ public class Table
     {
         return TableNr.ToString();
     }
+
+    public List<RequestLine> getRequests()
+    {
+        return this.requests;
+    }
+
+    public void ClearRequests()
+    {
+        this.requests = new List<RequestLine>();
+    }
 }
+
+#region delegates
+public delegate void RequestReadyDelegate(RequestLine rl);
+public delegate void BarRequestDelegate(RequestLine rl);
+public delegate void RestaurantDelegate(RequestLine rl);
+#endregion
+
 
 #region Interfaces
 public interface ISingleServer
 {
-    void ClientAddress(Guid guid, string address);
-    void SomeCall(Guid guid);
-    void MakeRequest(short tableNr, short p, short qtty, String dsc);
-    bool RequestBill(short tableNr);
+    event RequestReadyDelegate requestReadyEvent;
+    event BarRequestDelegate barRequestEvent;
+    event RestaurantDelegate restaurantRequestEvent;
+    void ClientAddress(string address);
+    void MakeRequest(ushort tableNr, ushort p, ushort qtty, String dsc);
+    bool RequestBill(ushort tableNr);
     void ChangeRequestState(RequestLine rl);
+    void PayTable(ushort t);
 }
 
 public interface IRoomService
 {
     void SomeMessage(string message);
     void SetProducts(List<Product> ps);
-    void SetNrTables(short nrTbls);
+    void SetNrTables(ushort nrTbls);
     void requestNotification(RequestLine rl);
 }
 
