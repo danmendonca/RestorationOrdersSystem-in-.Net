@@ -7,6 +7,9 @@ using System.Windows.Forms;
 
 public partial class Window : Form
 {
+    private static String PTWaiting = "Fila";
+    private static String PTInProgress = "Preparação";
+    private static String PTReady = "Pronto";
     Guid guid;
     ISingleServer registerServer;
     public RoomProxy roomProxy;
@@ -51,13 +54,20 @@ public partial class Window : Form
 
     private void buttonMkReq_Click(object sender, EventArgs e)
     {
-        //TODO try catch
         string dsc = textBoxDescription.Text;
         ushort tblNr = (ushort)comboBoxTable.SelectedIndex;
         ushort pIndex = (ushort)comboBoxProduct.SelectedIndex;
         ushort qtt = (ushort)spinnerQuantity.Value;
         RequestLine rl = new RequestLine(0, pIndex, qtt, tblNr, dsc);
-        registerServer.MakeRequest(rl);
+        try {
+            registerServer.MakeRequest(rl);
+            textBoxDescription.Text = "";
+            spinnerQuantity.Value = 1;
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine("RoomService:buttonMkReq_Click ==> cannot connect with registerServer\n " + ex.ToString() );
+        }
     }
 
 
@@ -101,7 +111,7 @@ public partial class Window : Form
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Client:btnAskBill_Click ===> " + ex.ToString());
+            Console.WriteLine("Client:btnAskBill_Click ===> \n" + ex.ToString());
         }
     }
 
@@ -126,15 +136,25 @@ public partial class Window : Form
         if (InvokeRequired)
             BeginInvoke((MethodInvoker)delegate { RoomProxy_rREvent(rl); });
         else
-            textBoxRequests.Text += (rl.ToString() + Environment.NewLine);
+        {
+            ListViewItem lvi = new ListViewItem(rl.RequestNr.ToString());
+            lvi.SubItems.Add(rl.TableNr.ToString());
+            lvi.SubItems.Add(ps[rl.Prod].ToString());
+            lvi.SubItems.Add(rl.Qtt.ToString());
+            if (rl.RState == RequestState.Waiting) lvi.SubItems.Add(PTWaiting);
+            else if (rl.RState == RequestState.InProgress) lvi.SubItems.Add(PTInProgress);
+            else lvi.SubItems.Add(PTReady);
+            listViewRequests.Items.Add(lvi);
+        }
+      //  else
+        //    textBoxRequests.Text += (rl.ToString() + Environment.NewLine);
     }
 
 
 
+
+
     #endregion
-
-
-
 }
 
 class RemoteNew
