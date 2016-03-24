@@ -2,55 +2,77 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.Remoting;
+using System.Threading;
 using System.Windows.Forms;
 
 public partial class Window : Form
 {
-    int port;
     Guid guid;
-    ISingleServer server;
-    private List<Product> ps { get; private set; }
-    private List<RequestLine> toDeliver = new List<RequestLine>(); 
+    ISingleServer registerServer;
+    public RoomProxy roomProxy;
+    private List<Product> ps { get; set; }
+    private List<RequestLine> toDeliver = new List<RequestLine>();
     ushort nrTables;
 
-    public Window(int myPort)
+
+    public override object InitializeLifetimeService()
     {
-        port = myPort;
-        guid = Guid.NewGuid();
+        return null;
+    }
+
+
+    public Window()
+    {
         InitializeComponent();
+        guid = Guid.NewGuid();
+
+        //create proxy to registerServer and subscribe its events
+        roomProxy = new RoomProxy();
+        roomProxy.rREvent += new RequestReadyDelegate(RoomProxy_rREvent);
+        roomProxy.rDEvent += new RequestDeliveredDelegate(RoomProxy_rDEvent);
+
+        //reference to registerServer
+        registerServer = (ISingleServer)RemoteNew.New(typeof(ISingleServer));
+
+        //getting info from registerServer and update UI
+        ps = registerServer.GetProducts();
+        nrTables = registerServer.GetNrTables();
+        SetListProducts(ps);
+        SetNrTables(nrTables);
+
+        //subscribe proxy to registerServer events
+        RequestReadyDelegate rrd = new RequestReadyDelegate(roomProxy.RepeaterRReady);
+        registerServer.requestReadyEvent += rrd;
     }
 
-    private void Window_Load(object sender, EventArgs e)
-    {
-        server = (ISingleServer)R.New(typeof(ISingleServer));  // get reference to the singleton remote object
-    }
+    #region RegisterDirectCalls
 
-    private void buttonConnect_Click(object sender, EventArgs e)
-    {
-        server.ClientAddress("tcp://localhost:" + port.ToString() + "/Message");
-    }
+
 
     private void buttonMkReq_Click(object sender, EventArgs e)
     {
+        //TODO try catch
         string dsc = textBoxDescription.Text;
         ushort tblNr = (ushort)comboBoxTable.SelectedIndex;
         ushort pIndex = (ushort)comboBoxProduct.SelectedIndex;
         ushort qtt = (ushort)spinnerQuantity.Value;
-        server.MakeRequest((ushort)comboBoxTable.SelectedIndex, (ushort)comboBoxProduct.SelectedIndex, (ushort)spinnerQuantity.Value, textBoxDescription.Text);
-        // ushort s = 2;
-        //server.MakeRequest(s, ps[2], s, "");
-        textBoxReadyReq.Text += ("Calling Server ..." + Environment.NewLine);
-
-        //ps= server.GetProducts();
+        RequestLine rl = new RequestLine(0, pIndex, qtt, tblNr, dsc);
+        registerServer.MakeRequest(rl);
     }
 
-    public void AddMessage(string message)
+
+    public void SetNrTables(ushort nrTables)
     {
         if (InvokeRequired)
-            BeginInvoke((MethodInvoker)delegate { AddMessage(message); });
+            BeginInvoke((MethodInvoker)delegate { SetNrTables(nrTables); });
         else
-            textBoxReadyReq.Text += (message + Environment.NewLine);
+        {
+            this.nrTables = nrTables;
+            comboBoxTable.Items.Clear();
+            for (ushort i = 0; i < nrTables; i++) comboBoxTable.Items.Add($"Mesa {i.ToString(),2}");
+        }
     }
+
 
     public void SetListProducts(List<Product> lp)
     {
@@ -63,94 +85,76 @@ public partial class Window : Form
             foreach (Product p in lp) comboBoxProduct.Items.Add(p);
         }
     }
-    public void SetNrTables(ushort nrTables)
-    {
 
-        if (InvokeRequired)
-            BeginInvoke((MethodInvoker)delegate { SetNrTables(nrTables); });
-        else
-        {
-            this.nrTables = nrTables;
-            comboBoxTable.Items.Clear();
-            for (ushort i = 0; i < nrTables; i++) comboBoxTable.Items.Add($"Mesa {i.ToString(),2}");
-        }
-    }
-
-    public void AddRequestState(RequestLine rl)
-    {
-        if (InvokeRequired)
-            BeginInvoke((MethodInvoker)delegate { AddRequestState(rl); });
-        else
-            textBoxReadyReq.Text += (rl.ToString() + Environment.NewLine);
-    }
 
     public void deliverRequest(RequestLine rl)
-    {
-        if (InvokeRequired)
-            BeginInvoke((MethodInvoker)delegate { AddMessage(message); });
-        else
-            textBoxReadyReq.Text += (message + Environment.NewLine);
-    }
-}
-
-class R
-{
-    private static IDictionary wellKnownTypes;
-
-    public static object New(Type type)
-    {
-        if (wellKnownTypes == null)
-            InitTypeCache();
-        WellKnownClientTypeEntry entry = (WellKnownClientTypeEntry)wellKnownTypes[type];
-        if (entry == null)
-            throw new RemotingException("Type not found!");
-        return Activator.GetObject(type, entry.ObjectUrl);
-    }
-
-    public static void InitTypeCache()
-    {
-        Hashtable types = new Hashtable();
-        foreach (WellKnownClientTypeEntry entry in RemotingConfiguration.GetRegisteredWellKnownClientTypes())
-        {
-            if (entry.ObjectType == null)
-                throw new RemotingException("A configured type could not be found!");
-            types.Add(entry.ObjectType, entry);
-        }
-        wellKnownTypes = types;
-    }
-}
-
-public class RemMessage : MarshalByRefObject, IRoomService
-{
-    private Window win;
-
-    public void SetNrTables(ushort nrTbls)
-    {
-        win.SetNrTables(nrTbls);
-    }
-
-    public void SetProducts(List<Product> lp)
-    {
-        win.SetListProducts(lp);
-    }
-
-    public override object InitializeLifetimeService()
-    {
-        return null;
-    }
-
-    public void PutMyForm(Window form)
-    {
-        win = form;
-    }
-
-    public void requestNotification(RequestLine rl)
     {
         throw new NotImplementedException();
     }
 
-    public void SomeMessage(string message)
+
+    private void btnAskBill_Click(object sender, EventArgs e)
     {
-        win.AddMessage(message);
+        try
+        {
+            registerServer.RequestBill((ushort)comboBoxTable.SelectedIndex);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Client:btnAskBill_Click ===> " + ex.ToString());
+        }
+    }
+
+
+
+    #endregion
+
+
+
+    #region Handlers
+
+
+
+    private void RoomProxy_rDEvent(RequestLine rl)
+    {
+        throw new NotImplementedException();
+    }
+
+
+    private void RoomProxy_rREvent(RequestLine rl)
+    {
+        if (InvokeRequired)
+            BeginInvoke((MethodInvoker)delegate { RoomProxy_rREvent(rl); });
+        else
+            textBoxRequests.Text += (rl.ToString() + Environment.NewLine);
+    }
+
+
+
+    #endregion
+
+
+
+}
+
+class RemoteNew
+{
+    private static Hashtable types = null;
+
+    private static void InitTypeTable()
+    {
+        types = new Hashtable();
+        foreach (WellKnownClientTypeEntry entry in RemotingConfiguration.GetRegisteredWellKnownClientTypes())
+            types.Add(entry.ObjectType, entry);
+    }
+
+    public static object New(Type type)
+    {
+        if (types == null)
+            InitTypeTable();
+        WellKnownClientTypeEntry entry = (WellKnownClientTypeEntry)types[type];
+        if (entry == null)
+            throw new RemotingException("Type not found!");
+        return RemotingServices.Connect(type, entry.ObjectUrl);
     }
 }

@@ -27,6 +27,7 @@ public class SingleServer : MarshalByRefObject, ISingleServer
     public event RequestReadyDelegate requestReadyEvent;
     public event BarRequestDelegate barRequestEvent;
     public event RestaurantDelegate restaurantRequestEvent;
+    public event RequestDeliveredDelegate requestDeliveryEvent;
 
     public SingleServer()
     {
@@ -40,59 +41,6 @@ public class SingleServer : MarshalByRefObject, ISingleServer
     {
         tables = new Table[NrTables];
         for (ushort i = 0; i < NrTables; i++) tables[(int)i] = new Table(i);
-    }
-
-    public void ChangeRequestState(RequestLine rl)
-    {
-        if (requestReadyEvent == null)
-            return;
-
-        Delegate[] invkList = requestReadyEvent.GetInvocationList();
-        foreach (RequestReadyDelegate handler in invkList)
-        {
-            new Thread(() =>
-            {
-                try
-                {
-                    handler(rl);
-                }
-                catch (Exception)
-                {
-                    requestReadyEvent -= handler;
-                }
-            }).Start();
-        }
-
-        throw new NotImplementedException();
-    }
-
-    public void ClientAddress(string address)    //TODO guid and address are not necessary as we are using event subscribers
-    {
-        IRoomService rem = (IRoomService)RemotingServices.Connect(typeof(IRoomService), address);
-        rem.SetProducts(products);
-        rem.SetNrTables(NrTables);
-    }
-
-    public void MakeRequest(ushort tableNr, ushort p, ushort qtty, string dsc)
-    {
-        if (tableNr > NrTables || tables[tableNr].TblState != TableStateID.Available)
-            return;
-
-        RequestLine rl = new RequestLine(NrRequests++, p, qtty, tableNr, dsc);
-        tables[tableNr].insertNewRequest(rl);
-
-        Console.WriteLine($"Added new request to table {rl.TableNr} for {rl.Qtt} of {products[p]}");
-    }
-
-    public bool RequestBill(ushort t)
-    {
-        if (t > NrTables || tables[t].TblState != TableStateID.Available)
-            return false;
-
-        tables[t].changeState();
-        bills.Add(tables[t].getRequests());
-
-        return true;
     }
 
     private void CreateProducts()
@@ -124,5 +72,64 @@ public class SingleServer : MarshalByRefObject, ISingleServer
         bills.Add(tables[t].getRequests());
         tables[t].changeState();
         tables[t].ClearRequests();
+    }
+
+    void ISingleServer.MakeRequest(RequestLine rl)
+    {
+        Console.WriteLine($"Added new request to table {rl.TableNr} for {rl.Qtt} of {products[rl.Prod]}");
+        if (rl.TableNr > NrTables || tables[rl.TableNr].TblState != TableStateID.Available)
+            return;
+        rl.RequestNr = NrRequests++;
+        tables[rl.TableNr].insertNewRequest(rl);
+
+        //testing purposes while no restaurant/bar implementation
+        //ChangeRequestState(rl); 
+    }
+
+    public void ChangeRequestState(RequestLine rl)
+    {
+        if (requestReadyEvent == null)
+        {
+            Console.WriteLine("No subscribers ");
+            return;
+        }
+
+        Delegate[] invkList = requestReadyEvent.GetInvocationList();
+        foreach (RequestReadyDelegate handler in invkList)
+        {
+            Console.WriteLine("I'm a new thread! Sending RequestReady messages");
+            new Thread(() =>
+            {
+                try
+                {
+                    handler(rl);
+                }
+                catch (Exception)
+                {
+                    requestReadyEvent -= handler;
+                }
+            }).Start();
+        }
+    }
+
+    ushort ISingleServer.GetNrTables()
+    {
+        return NrTables;
+    }
+
+    List<Product> ISingleServer.GetProducts()
+    {
+        return products;
+    }
+
+    bool ISingleServer.RequestBill(ushort tableNr)
+    {
+        if (tableNr > NrTables || tables[tableNr].TblState != TableStateID.Available)
+            return false;
+
+        tables[tableNr].changeState();
+        bills.Add(tables[tableNr].getRequests());
+
+        return true;
     }
 }

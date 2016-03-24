@@ -22,9 +22,9 @@
   /// the contents of this method with the code editor.
   /// </summary>
   private void InitializeComponent() {
-            this.btnConnect = new System.Windows.Forms.Button();
+            this.btnAskBill = new System.Windows.Forms.Button();
             this.btnMkReq = new System.Windows.Forms.Button();
-            this.textBoxReadyReq = new System.Windows.Forms.TextBox();
+            this.textBoxRequests = new System.Windows.Forms.TextBox();
             this.comboBoxTable = new System.Windows.Forms.ComboBox();
             this.comboBoxProduct = new System.Windows.Forms.ComboBox();
             this.spinnerQuantity = new System.Windows.Forms.NumericUpDown();
@@ -32,16 +32,16 @@
             ((System.ComponentModel.ISupportInitialize)(this.spinnerQuantity)).BeginInit();
             this.SuspendLayout();
             // 
-            // btnConnect
+            // btnAskBill
             // 
-            this.btnConnect.Location = new System.Drawing.Point(197, 1);
-            this.btnConnect.Name = "btnConnect";
-            this.btnConnect.Size = new System.Drawing.Size(75, 23);
-            this.btnConnect.TabIndex = 1;
-            this.btnConnect.Text = "Ligar";
-            this.btnConnect.TextImageRelation = System.Windows.Forms.TextImageRelation.TextAboveImage;
-            this.btnConnect.UseVisualStyleBackColor = true;
-            this.btnConnect.Click += new System.EventHandler(this.buttonConnect_Click);
+            this.btnAskBill.Location = new System.Drawing.Point(197, 1);
+            this.btnAskBill.Name = "btnAskBill";
+            this.btnAskBill.Size = new System.Drawing.Size(75, 23);
+            this.btnAskBill.TabIndex = 1;
+            this.btnAskBill.Text = "Pedir Conta";
+            this.btnAskBill.TextImageRelation = System.Windows.Forms.TextImageRelation.TextAboveImage;
+            this.btnAskBill.UseVisualStyleBackColor = true;
+            this.btnAskBill.Click += new System.EventHandler(this.btnAskBill_Click);
             // 
             // btnMkReq
             // 
@@ -53,15 +53,15 @@
             this.btnMkReq.UseVisualStyleBackColor = true;
             this.btnMkReq.Click += new System.EventHandler(this.buttonMkReq_Click);
             // 
-            // textBoxReadyReq
+            // textBoxRequests
             // 
-            this.textBoxReadyReq.Location = new System.Drawing.Point(13, 105);
-            this.textBoxReadyReq.Multiline = true;
-            this.textBoxReadyReq.Name = "textBoxReadyReq";
-            this.textBoxReadyReq.ReadOnly = true;
-            this.textBoxReadyReq.Size = new System.Drawing.Size(259, 144);
-            this.textBoxReadyReq.TabIndex = 0;
-            this.textBoxReadyReq.TabStop = false;
+            this.textBoxRequests.Location = new System.Drawing.Point(13, 105);
+            this.textBoxRequests.Multiline = true;
+            this.textBoxRequests.Name = "textBoxRequests";
+            this.textBoxRequests.ReadOnly = true;
+            this.textBoxRequests.Size = new System.Drawing.Size(259, 144);
+            this.textBoxRequests.TabIndex = 0;
+            this.textBoxRequests.TabStop = false;
             // 
             // comboBoxTable
             // 
@@ -97,18 +97,17 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(284, 261);
+            this.ClientSize = new System.Drawing.Size(293, 261);
             this.Controls.Add(this.textBoxDescription);
             this.Controls.Add(this.spinnerQuantity);
             this.Controls.Add(this.comboBoxProduct);
             this.Controls.Add(this.comboBoxTable);
-            this.Controls.Add(this.textBoxReadyReq);
+            this.Controls.Add(this.textBoxRequests);
             this.Controls.Add(this.btnMkReq);
-            this.Controls.Add(this.btnConnect);
+            this.Controls.Add(this.btnAskBill);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Name = "Window";
             this.Text = "Client";
-            this.Load += new System.EventHandler(this.Window_Load);
             ((System.ComponentModel.ISupportInitialize)(this.spinnerQuantity)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -116,9 +115,9 @@
   }
 
   #endregion
-  private System.Windows.Forms.Button btnConnect;
+  private System.Windows.Forms.Button btnAskBill;
   private System.Windows.Forms.Button btnMkReq;
-  private System.Windows.Forms.TextBox textBoxReadyReq;
+  private System.Windows.Forms.TextBox textBoxRequests;
     private System.Windows.Forms.ComboBox comboBoxTable;
     private System.Windows.Forms.ComboBox comboBoxProduct;
     private System.Windows.Forms.NumericUpDown spinnerQuantity;

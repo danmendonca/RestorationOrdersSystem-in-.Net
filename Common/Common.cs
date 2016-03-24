@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 
+[Serializable]
 public enum PreparationRoomID { Bar, Restaurant };
+[Serializable]
 public enum TableStateID { Available, Paying };
+[Serializable]
 public enum RequestState { Waiting, InProgress, Ready };
 
 [Serializable]
@@ -71,7 +74,7 @@ public class RequestLine : MarshalByRefObject
     }
 }
 
-
+[Serializable]
 public class Table
 {
     public ushort TableNr { get; private set; }
@@ -119,6 +122,11 @@ public class Table
 public delegate void RequestReadyDelegate(RequestLine rl);
 public delegate void BarRequestDelegate(RequestLine rl);
 public delegate void RestaurantDelegate(RequestLine rl);
+public delegate void RequestDeliveredDelegate(RequestLine rl);
+
+
+public delegate void NrTablesDelegate(ushort n);
+public delegate void ProductListDelegate(List<Product> lp);
 #endregion
 
 
@@ -126,20 +134,18 @@ public delegate void RestaurantDelegate(RequestLine rl);
 public interface ISingleServer
 {
     event RequestReadyDelegate requestReadyEvent;
+    event RequestDeliveredDelegate requestDeliveryEvent;
     event BarRequestDelegate barRequestEvent;
     event RestaurantDelegate restaurantRequestEvent;
-    void ClientAddress(string address);
-    void MakeRequest(ushort tableNr, ushort p, ushort qtty, String dsc);
-    bool RequestBill(ushort tableNr);
     void ChangeRequestState(RequestLine rl);
-    void PayTable(ushort t);
+    void MakeRequest(RequestLine rl);
+    ushort GetNrTables();
+    List<Product> GetProducts();
+    bool RequestBill(ushort tableNr);
 }
 
 public interface IRoomService
 {
-    void SomeMessage(string message);
-    void SetProducts(List<Product> ps);
-    void SetNrTables(ushort nrTbls);
     void requestNotification(RequestLine rl);
 }
 
