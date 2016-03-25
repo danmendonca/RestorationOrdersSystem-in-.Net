@@ -24,7 +24,6 @@ public partial class Window : Form
     ISingleServer registerServer;
     public RoomProxy roomProxy;
     private List<Product> ps { get; set; }
-    private List<RequestLine> toDeliver = new List<RequestLine>();
     ushort nrTables = 0;
 
     #endregion
