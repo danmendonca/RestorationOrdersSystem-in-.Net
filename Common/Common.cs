@@ -6,7 +6,7 @@ public enum PreparationRoomID { Bar, Restaurant };
 [Serializable]
 public enum TableStateID { Available, Paying };
 [Serializable]
-public enum RequestState { Waiting, InProgress, Ready };
+public enum RequestState { Waiting, InProgress, Ready, Delivered };
 
 [Serializable]
 public class Product
@@ -116,6 +116,17 @@ public class Table
     {
         this.requests = new List<RequestLine>();
     }
+
+    public void changeRequestState(ushort rNr)
+    {
+        foreach(RequestLine rl in requests)
+        {
+            if (rl.RequestNr != rNr)
+                continue;
+            rl.changeState();
+            break;
+        }
+    }
 }
 
 #region delegates
@@ -142,6 +153,7 @@ public interface ISingleServer
     ushort GetNrTables();
     List<Product> GetProducts();
     bool RequestBill(ushort tableNr);
+    void SetRequestDelivered(int tblNr, ushort rNumber);
 }
 
 public interface IRoomService

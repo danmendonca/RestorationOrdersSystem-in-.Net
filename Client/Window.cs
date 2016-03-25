@@ -7,9 +7,20 @@ using System.Windows.Forms;
 
 public partial class Window : Form
 {
+    #region Statics
     private static String PTWaiting = "Fila";
     private static String PTInProgress = "Preparação";
     private static String PTReady = "Pronto";
+    private static int LISTVIEW_REQ_NR_INDEX = 0;
+    private static int LISTVIEW_TABLE_INDEX = 1;
+    private static int LISTVIEW_PRODUCT_INDEX = 2;
+    private static int LISTVIEW_QUANTITY_INDEX = 3;
+    private static int LISTVIEW_STATE_INDEX = 4;
+    #endregion
+
+
+
+    #region Attributes
     Guid guid;
     ISingleServer registerServer;
     public RoomProxy roomProxy;
@@ -17,11 +28,14 @@ public partial class Window : Form
     private List<RequestLine> toDeliver = new List<RequestLine>();
     ushort nrTables;
 
+    #endregion
+
 
     public override object InitializeLifetimeService()
     {
         return null;
     }
+
 
 
     public Window()
@@ -40,18 +54,63 @@ public partial class Window : Form
         //getting info from registerServer and update UI
         ps = registerServer.GetProducts();
         nrTables = registerServer.GetNrTables();
-        SetListProducts(ps);
-        SetNrTables(nrTables);
+        AskListProducts(ps);
+        AskNrTables(nrTables);
 
         //subscribe proxy to registerServer events
         RequestReadyDelegate rrd = new RequestReadyDelegate(roomProxy.RepeaterRReady);
         registerServer.requestReadyEvent += rrd;
     }
 
+
+    private void RemoveReqFromLView(RequestLine rl)
+    {
+        if (InvokeRequired) BeginInvoke((MethodInvoker)delegate { RemoveReqFromLView(rl); });
+        else
+        {
+            for (int i = 0; i < listViewRequests.Items.Count; i++)
+            {
+                ushort reqNr = Convert.ToUInt16(listViewRequests.Items[i].SubItems[0].Text);
+                if (rl.RequestNr != reqNr) continue;
+                listViewRequests.Items[i].Remove();
+            }
+        }
+    }
+
+    private void ChangeReqStateInLView(RequestLine rl)
+    {
+        if (InvokeRequired) BeginInvoke((MethodInvoker)delegate { ChangeReqStateInLView(rl); });
+        else
+        {
+            for (int i = 0; i < listViewRequests.Items.Count; i++)
+            {
+                ushort reqNr = Convert.ToUInt16(listViewRequests.Items[i].SubItems[0].Text);
+                if (rl.RequestNr != reqNr) continue;
+
+                listViewRequests.Items[i].SubItems[LISTVIEW_STATE_INDEX].Text =
+                    (rl.RState == RequestState.InProgress) ? PTInProgress : PTReady;
+            }
+        }
+    }
+
+    private void AddReqToLView(RequestLine rl)
+    {
+        if (InvokeRequired) BeginInvoke((MethodInvoker)delegate { AddReqToLView(rl); });
+        else
+        {
+            ListViewItem lvi = new ListViewItem(rl.RequestNr.ToString());
+            lvi.SubItems.Add(rl.TableNr.ToString());
+            lvi.SubItems.Add(ps[rl.Prod].ToString());
+            lvi.SubItems.Add(rl.Qtt.ToString());
+            lvi.SubItems.Add(PTWaiting);
+
+            listViewRequests.Items.Add(lvi);
+        }
+    }
+
+
+
     #region RegisterDirectCalls
-
-
-
     private void buttonMkReq_Click(object sender, EventArgs e)
     {
         string dsc = textBoxDescription.Text;
@@ -59,22 +118,38 @@ public partial class Window : Form
         ushort pIndex = (ushort)comboBoxProduct.SelectedIndex;
         ushort qtt = (ushort)spinnerQuantity.Value;
         RequestLine rl = new RequestLine(0, pIndex, qtt, tblNr, dsc);
-        try {
+        try
+        {
             registerServer.MakeRequest(rl);
             textBoxDescription.Text = "";
             spinnerQuantity.Value = 1;
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
-            Console.WriteLine("RoomService:buttonMkReq_Click ==> cannot connect with registerServer\n " + ex.ToString() );
+            Console.WriteLine("RoomService:buttonMkReq_Click ==> cannot connect with registerServer\n " + ex.ToString());
         }
     }
 
 
-    public void SetNrTables(ushort nrTables)
+    private void btnReqDelivered_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            ushort nrRequestDelivered = Convert.ToUInt16(listViewRequests.SelectedItems[0].SubItems[0].Text);
+            int tblNr = Convert.ToInt32(listViewRequests.SelectedItems[0].SubItems[1].Text);
+            registerServer.SetRequestDelivered(tblNr, nrRequestDelivered);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Exception at RoomService:btnDelivered_Click \n" + ex.ToString());
+        }
+    }
+
+
+    public void AskNrTables(ushort nrTables)
     {
         if (InvokeRequired)
-            BeginInvoke((MethodInvoker)delegate { SetNrTables(nrTables); });
+            BeginInvoke((MethodInvoker)delegate { AskNrTables(nrTables); });
         else
         {
             this.nrTables = nrTables;
@@ -84,10 +159,10 @@ public partial class Window : Form
     }
 
 
-    public void SetListProducts(List<Product> lp)
+    public void AskListProducts(List<Product> lp)
     {
         if (InvokeRequired)
-            BeginInvoke((MethodInvoker)delegate { SetListProducts(lp); });
+            BeginInvoke((MethodInvoker)delegate { AskListProducts(lp); });
         else
         {
             ps = lp;
@@ -96,11 +171,6 @@ public partial class Window : Form
         }
     }
 
-
-    public void deliverRequest(RequestLine rl)
-    {
-        throw new NotImplementedException();
-    }
 
 
     private void btnAskBill_Click(object sender, EventArgs e)
@@ -114,9 +184,6 @@ public partial class Window : Form
             Console.WriteLine("Client:btnAskBill_Click ===> \n" + ex.ToString());
         }
     }
-
-
-
     #endregion
 
 
@@ -133,21 +200,20 @@ public partial class Window : Form
 
     private void RoomProxy_rREvent(RequestLine rl)
     {
-        if (InvokeRequired)
-            BeginInvoke((MethodInvoker)delegate { RoomProxy_rREvent(rl); });
-        else
+
+        switch (rl.RState)
         {
-            ListViewItem lvi = new ListViewItem(rl.RequestNr.ToString());
-            lvi.SubItems.Add(rl.TableNr.ToString());
-            lvi.SubItems.Add(ps[rl.Prod].ToString());
-            lvi.SubItems.Add(rl.Qtt.ToString());
-            if (rl.RState == RequestState.Waiting) lvi.SubItems.Add(PTWaiting);
-            else if (rl.RState == RequestState.InProgress) lvi.SubItems.Add(PTInProgress);
-            else lvi.SubItems.Add(PTReady);
-            listViewRequests.Items.Add(lvi);
+            case RequestState.Waiting:
+                AddReqToLView(rl);
+                break;
+            case RequestState.Delivered:
+                RemoveReqFromLView(rl);
+                break;
+            default:
+                ChangeReqStateInLView(rl);
+                break;
         }
-      //  else
-        //    textBoxRequests.Text += (rl.ToString() + Environment.NewLine);
+
     }
 
 
@@ -155,6 +221,7 @@ public partial class Window : Form
 
 
     #endregion
+
 }
 
 class RemoteNew

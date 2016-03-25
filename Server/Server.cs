@@ -83,7 +83,14 @@ public class SingleServer : MarshalByRefObject, ISingleServer
         tables[rl.TableNr].insertNewRequest(rl);
 
         //testing purposes while no restaurant/bar implementation
-        //ChangeRequestState(rl); 
+        ChangeRequestState(rl);
+        List<RequestLine> tableRls = tables[rl.TableNr].getRequests();
+        if (tableRls.Count > 1)
+        {
+            int previous = tableRls.Count - 2;
+            tables[rl.TableNr].changeRequestState(tableRls[previous].RequestNr);
+            ChangeRequestState(tableRls[previous]);
+        }
     }
 
     public void ChangeRequestState(RequestLine rl)
@@ -131,5 +138,19 @@ public class SingleServer : MarshalByRefObject, ISingleServer
         bills.Add(tables[tableNr].getRequests());
 
         return true;
+    }
+
+    void ISingleServer.SetRequestDelivered(int tblNr, ushort rNumber)
+    {
+        foreach (RequestLine reqL in tables[tblNr].getRequests())
+        {
+            if (reqL.RequestNr != rNumber) continue;
+            Console.WriteLine($"Request nr: {reqL.RequestNr} delivered");
+            reqL.RState = RequestState.Delivered;
+            ChangeRequestState(reqL);
+            break;
+        }
+
+
     }
 }
