@@ -70,7 +70,7 @@ public partial class Window : Form
         {
             for (int i = 0; i < listViewRequests.Items.Count; i++)
             {
-                ushort reqNr = Convert.ToUInt16(listViewRequests.Items[i].SubItems[0].Text);
+                ushort reqNr = Convert.ToUInt16(listViewRequests.Items[i].SubItems[LISTVIEW_REQ_NR_INDEX].Text);
                 if (rl.RequestNr != reqNr) continue;
                 listViewRequests.Items[i].Remove();
             }
@@ -84,7 +84,7 @@ public partial class Window : Form
         {
             for (int i = 0; i < listViewRequests.Items.Count; i++)
             {
-                ushort reqNr = Convert.ToUInt16(listViewRequests.Items[i].SubItems[0].Text);
+                ushort reqNr = Convert.ToUInt16(listViewRequests.Items[i].SubItems[LISTVIEW_REQ_NR_INDEX].Text);
                 if (rl.RequestNr != reqNr) continue;
 
                 listViewRequests.Items[i].SubItems[LISTVIEW_STATE_INDEX].Text =
@@ -133,6 +133,10 @@ public partial class Window : Form
 
     private void btnReqDelivered_Click(object sender, EventArgs e)
     {
+
+        if (listViewRequests.SelectedItems.Count < 1)
+            return;
+
         try
         {
             ushort nrRequestDelivered = Convert.ToUInt16(listViewRequests.SelectedItems[0].SubItems[0].Text);
