@@ -8,7 +8,6 @@ using System.Windows.Forms;
 public partial class Window : Form
 {
     #region Statics
-    private static String PTWaiting = "Fila";
     private static String PTInProgress = "Preparação";
     private static String PTReady = "Pronto";
     private static int LISTVIEW_REQ_NR_INDEX = 0;
@@ -26,7 +25,7 @@ public partial class Window : Form
     public RoomProxy roomProxy;
     private List<Product> ps { get; set; }
     private List<RequestLine> toDeliver = new List<RequestLine>();
-    ushort nrTables;
+    ushort nrTables = 0;
 
     #endregion
 
@@ -54,8 +53,8 @@ public partial class Window : Form
         //getting info from registerServer and update UI
         ps = registerServer.GetProducts();
         nrTables = registerServer.GetNrTables();
-        AskListProducts(ps);
-        AskNrTables(nrTables);
+        ChangeProductListUI();
+        ChangeTableListUI();
 
         //subscribe proxy to registerServer events
         RequestReadyDelegate rrd = new RequestReadyDelegate(roomProxy.RepeaterRReady);
@@ -87,8 +86,8 @@ public partial class Window : Form
                 ushort reqNr = Convert.ToUInt16(listViewRequests.Items[i].SubItems[LISTVIEW_REQ_NR_INDEX].Text);
                 if (rl.RequestNr != reqNr) continue;
 
-                listViewRequests.Items[i].SubItems[LISTVIEW_STATE_INDEX].Text =
-                    (rl.RState == RequestState.InProgress) ? PTInProgress : PTReady;
+                listViewRequests.Items[i].SubItems[LISTVIEW_STATE_INDEX].Text = PTReady;
+                break;
             }
         }
     }
@@ -102,7 +101,7 @@ public partial class Window : Form
             lvi.SubItems.Add(rl.TableNr.ToString());
             lvi.SubItems.Add(ps[rl.Prod].ToString());
             lvi.SubItems.Add(rl.Qtt.ToString());
-            lvi.SubItems.Add(PTWaiting);
+            lvi.SubItems.Add(PTInProgress);
 
             listViewRequests.Items.Add(lvi);
         }
@@ -150,28 +149,26 @@ public partial class Window : Form
     }
 
 
-    public void AskNrTables(ushort nrTables)
+    public void ChangeTableListUI()
     {
         if (InvokeRequired)
-            BeginInvoke((MethodInvoker)delegate { AskNrTables(nrTables); });
+            BeginInvoke((MethodInvoker)delegate { ChangeTableListUI(); });
         else
         {
-            this.nrTables = nrTables;
             comboBoxTable.Items.Clear();
             for (ushort i = 0; i < nrTables; i++) comboBoxTable.Items.Add($"Mesa {i.ToString(),2}");
         }
     }
 
 
-    public void AskListProducts(List<Product> lp)
+    public void ChangeProductListUI()
     {
         if (InvokeRequired)
-            BeginInvoke((MethodInvoker)delegate { AskListProducts(lp); });
+            BeginInvoke((MethodInvoker)delegate { ChangeProductListUI(); });
         else
         {
-            ps = lp;
             comboBoxProduct.Items.Clear();
-            foreach (Product p in lp) comboBoxProduct.Items.Add(p);
+            foreach (Product p in ps) comboBoxProduct.Items.Add(p);
         }
     }
 

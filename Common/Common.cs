@@ -145,7 +145,6 @@ public delegate void ProductListDelegate(List<Product> lp);
 public interface ISingleServer
 {
     event RequestReadyDelegate requestReadyEvent;
-    event RequestDeliveredDelegate requestDeliveryEvent;
     event BarRequestDelegate barRequestEvent;
     event RestaurantDelegate restaurantRequestEvent;
     void ChangeRequestState(RequestLine rl);

@@ -27,7 +27,6 @@ public class SingleServer : MarshalByRefObject, ISingleServer
     public event RequestReadyDelegate requestReadyEvent;
     public event BarRequestDelegate barRequestEvent;
     public event RestaurantDelegate restaurantRequestEvent;
-    public event RequestDeliveredDelegate requestDeliveryEvent;
 
     public SingleServer()
     {
