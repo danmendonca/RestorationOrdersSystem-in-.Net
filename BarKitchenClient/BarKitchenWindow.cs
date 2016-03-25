@@ -1,11 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Runtime.Remoting;
 using System.Windows.Forms;
 
 namespace BarKitchenClient
@@ -13,16 +7,20 @@ namespace BarKitchenClient
     public partial class BarKitchenWindow : Form
     {
 
-        List<RequestLine> requests;
+        // Remote server interface
+        ISingleServer remoteServer;
 
         public BarKitchenWindow()
         {
+
+            RemotingConfiguration.Configure("BarKitchenClient.exe.config", false);
+
             InitializeComponent();
         }
 
         private void BarKitchenWindow_Load(object sender, EventArgs e)
         {
-            requests = new List<RequestLine>();
+            
             ShowRequests();
         }
 
