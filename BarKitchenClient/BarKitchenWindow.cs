@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Runtime.Remoting;
 using System.Windows.Forms;
 
@@ -12,10 +13,18 @@ namespace BarKitchenClient
 
         public BarKitchenWindow()
         {
-
+            // Client configuration file
             RemotingConfiguration.Configure("BarKitchenClient.exe.config", false);
 
             InitializeComponent();
+            
+            // Remote Server object initialization
+            remoteServer = (ISingleServer)RemoteNew.New(typeof(ISingleServer));
+
+            ushort nTables = remoteServer.GetNrTables();
+
+            Console.WriteLine("Testing console...");
+            Console.WriteLine("Nr Tables = {0}", nTables);
         }
 
         private void BarKitchenWindow_Load(object sender, EventArgs e)
@@ -40,6 +49,40 @@ namespace BarKitchenClient
             item3.SubItems.Add("SubItem3b");
 
             listView1.Items.AddRange(new ListViewItem[] { item1, item2, item3 });
+        }
+
+    }
+
+    class RemoteNew
+    {
+        private static Hashtable types = null;
+
+        private static void InitTypeTable()
+        {
+            types = new Hashtable();
+
+            foreach(WellKnownClientTypeEntry entry in RemotingConfiguration.GetRegisteredWellKnownClientTypes())
+            {
+                types.Add(entry.ObjectType, entry);
+            }
+        }
+
+        public static object New(Type type)
+        {
+            if(types == null)
+            {
+                InitTypeTable();
+            }
+
+            WellKnownClientTypeEntry entry = (WellKnownClientTypeEntry) types[type];
+
+            if(entry == null)
+            {
+                throw new RemotingException("Type not found!");
+            }
+
+            return RemotingServices.Connect(type, entry.ObjectUrl);
+
         }
 
     }
