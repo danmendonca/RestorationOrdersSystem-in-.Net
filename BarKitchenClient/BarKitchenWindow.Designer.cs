@@ -34,6 +34,7 @@
             this.product = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.quantity = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.state = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.service = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
             this.button1 = new System.Windows.Forms.Button();
@@ -48,7 +49,8 @@
             this.table,
             this.product,
             this.quantity,
-            this.state});
+            this.state,
+            this.service});
             this.listView1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listView1.Location = new System.Drawing.Point(3, 21);
             this.listView1.Name = "listView1";
@@ -60,27 +62,32 @@
             // request
             // 
             this.request.Text = "Pedido";
-            this.request.Width = 100;
+            this.request.Width = 80;
             // 
             // table
             // 
             this.table.Text = "Mesa";
-            this.table.Width = 100;
+            this.table.Width = 80;
             // 
             // product
             // 
             this.product.Text = "Produto";
-            this.product.Width = 100;
+            this.product.Width = 80;
             // 
             // quantity
             // 
             this.quantity.Text = "Quantidade";
-            this.quantity.Width = 100;
+            this.quantity.Width = 80;
             // 
             // state
             // 
             this.state.Text = "Estado";
-            this.state.Width = 100;
+            this.state.Width = 80;
+            // 
+            // service
+            // 
+            this.service.Text = "Serviço";
+            this.service.Width = 80;
             // 
             // tableLayoutPanel1
             // 
@@ -144,6 +151,7 @@
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.ColumnHeader quantity;
         private System.Windows.Forms.ColumnHeader state;
+        private System.Windows.Forms.ColumnHeader service;
     }
 }
 

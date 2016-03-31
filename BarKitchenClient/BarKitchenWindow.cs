@@ -55,7 +55,7 @@ namespace BarKitchenClient
             foreach(RequestLine r in activeRequestList)
             {
                 ListViewItem lvItem = new ListViewItem(new string[] { r.RequestNr.ToString(), r.TableNr.ToString(),
-                    restaurantProducts[r.Prod].Name, r.Qtt.ToString(), r.RState.ToString() });
+                    restaurantProducts[r.Prod].Name, r.Qtt.ToString(), r.RState.ToString(), restaurantProducts[r.Prod].PreparationSource.ToString() });
                 listView1.Items.Add(lvItem);
             }
 
