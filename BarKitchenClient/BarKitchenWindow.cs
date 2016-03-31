@@ -109,6 +109,10 @@ namespace BarKitchenClient
             listView1.Items.AddRange(new ListViewItem[] { item1, item2, item3 });
         }
 
+        private void updateRequestState_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 
     class RemoteNew

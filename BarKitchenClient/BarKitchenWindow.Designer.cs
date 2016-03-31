@@ -52,9 +52,11 @@
             this.state,
             this.service});
             this.listView1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.listView1.Location = new System.Drawing.Point(3, 21);
+            this.listView1.FullRowSelect = true;
+            this.listView1.MultiSelect = false;
+            this.listView1.Location = new System.Drawing.Point(3, 54);
             this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(828, 489);
+            this.listView1.Size = new System.Drawing.Size(828, 456);
             this.listView1.TabIndex = 0;
             this.listView1.UseCompatibleStateImageBehavior = false;
             this.listView1.View = System.Windows.Forms.View.Details;
@@ -99,8 +101,8 @@
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 3;
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 3.592814F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 96.40719F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 9.941521F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 90.05848F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 51F));
             this.tableLayoutPanel1.Size = new System.Drawing.Size(834, 565);
             this.tableLayoutPanel1.TabIndex = 1;
@@ -119,10 +121,11 @@
             this.button1.AutoSize = true;
             this.button1.Location = new System.Drawing.Point(3, 3);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(123, 30);
+            this.button1.Size = new System.Drawing.Size(144, 30);
             this.button1.TabIndex = 0;
-            this.button1.Text = "Update Status";
+            this.button1.Text = "Actualizar Estado";
             this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.updateRequestState_Click);
             // 
             // BarKitchenWindow
             // 
