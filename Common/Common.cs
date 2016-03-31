@@ -153,6 +153,8 @@ public interface ISingleServer
     List<Product> GetProducts();
     bool RequestBill(ushort tableNr);
     void SetRequestDelivered(int tblNr, ushort rNumber);
+
+    Table[] GetRestaurantTables();
 }
 
 public interface IRoomService
