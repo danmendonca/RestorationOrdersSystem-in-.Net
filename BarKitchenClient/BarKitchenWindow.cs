@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Runtime.Remoting;
 using System.Windows.Forms;
 
@@ -7,31 +8,88 @@ namespace BarKitchenClient
 {
     public partial class BarKitchenWindow : Form
     {
-
+        #region Attributes
         // Remote server interface
         ISingleServer remoteServer;
+
+        // Restaurant tables list
+        Table[] restaurantTables;
+
+        // Restaurant product list
+        List<Product> restaurantProducts;
+
+        // Active request list
+        List<RequestLine> activeRequestList;
+        #endregion
 
         public BarKitchenWindow()
         {
             // Client configuration file
             RemotingConfiguration.Configure("BarKitchenClient.exe.config", false);
-
-            InitializeComponent();
-            
+          
             // Remote Server object initialization
             remoteServer = (ISingleServer)RemoteNew.New(typeof(ISingleServer));
 
-            ushort nTables = remoteServer.GetNrTables();
+            try {
 
-            Console.WriteLine("Testing console...");
-            Console.WriteLine("Nr Tables = {0}", nTables);
+                // Restaurant Tables
+                restaurantTables = remoteServer.GetRestaurantTables();
+
+                // Restaurant Products
+                restaurantProducts = remoteServer.GetProducts();
+
+            } catch(Exception e)
+            {
+                Console.WriteLine(e.GetType().FullName);
+                Console.WriteLine(e.Message);
+            }
+
+            // Windows Forms initialization
+            InitializeComponent();
         }
 
         private void BarKitchenWindow_Load(object sender, EventArgs e)
         {
-            
-            ShowRequests();
+            activeRequestList = GetAllActiveRequests();
+
+            foreach(RequestLine r in activeRequestList)
+            {
+                ListViewItem lvItem = new ListViewItem(new string[] { r.RequestNr.ToString(), r.TableNr.ToString(),
+                    restaurantProducts[r.Prod].Name, r.Qtt.ToString(), r.RState.ToString() });
+                listView1.Items.Add(lvItem);
+            }
+
+            //Console.WriteLine("Testing console...");
+            //Console.WriteLine("Nr Tables = {0}", restaurantTables.Length);
+
         }
+
+        
+        private List<RequestLine> GetAllActiveRequests()
+        {
+            List<RequestLine> arList = new List<RequestLine>();
+
+            if (restaurantTables == null) return arList;
+        
+            foreach(Table t in restaurantTables)
+            {
+                List<RequestLine> temp = t.getRequests();
+                
+                foreach(RequestLine r in temp)
+                {
+                    if (r.RState == RequestState.Waiting ||  r.RState == RequestState.InProgress)
+                    {
+                        arList.Add(r);
+                    }
+                }
+
+                temp.Clear();
+            }
+
+            return arList;
+        }
+        
+        
 
         private void ShowRequests()
         {
