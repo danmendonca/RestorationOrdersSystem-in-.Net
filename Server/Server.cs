@@ -47,11 +47,11 @@ public class SingleServer : MarshalByRefObject, ISingleServer
         if (products.Count > 0)
             return;
 
-        Product p1 = new Product("Francesinha", 9.5f, PreparationRoomID.Restaurant);
+        Product p1 = new Product("Francesinha", 9.5f, PreparationRoomID.Kitchen);
         products.Add(p1);
-        Product p2 = new Product("Pica-Pau", 7.0f, PreparationRoomID.Restaurant);
+        Product p2 = new Product("Pica-Pau", 7.0f, PreparationRoomID.Kitchen);
         products.Add(p2);
-        Product p3 = new Product("Sopa", 2.5f, PreparationRoomID.Restaurant);
+        Product p3 = new Product("Sopa", 2.5f, PreparationRoomID.Kitchen);
         products.Add(p3);
         Product p4 = new Product("Tosta Mista", 1.5f, PreparationRoomID.Bar);
         products.Add(p4);

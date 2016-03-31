@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 
 [Serializable]
-public enum PreparationRoomID { Bar, Restaurant };
+public enum PreparationRoomID { Bar, Kitchen };
 [Serializable]
 public enum TableStateID { Available, Paying };
 [Serializable]
@@ -13,7 +13,7 @@ public class Product
 {
     public string Name { get; protected set; }
     public float Price { get; protected set; }
-    PreparationRoomID PreparationSource { get; set; }
+    public PreparationRoomID PreparationSource { get; set; }
 
     public Product(string name, float price, PreparationRoomID PreparationSource)
     {
