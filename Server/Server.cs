@@ -152,4 +152,9 @@ public class SingleServer : MarshalByRefObject, ISingleServer
 
 
     }
+
+    Table[] ISingleServer.GetRestaurantTables()
+    {
+        return tables;
+    }
 }
