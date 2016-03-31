@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Remoting;
 using System.Windows.Forms;
 
@@ -64,7 +65,20 @@ namespace BarKitchenClient
 
         }
 
-        
+        private void updateRequestState_Click(object sender, EventArgs e)
+        {
+            String requestNr = listView1.SelectedItems[0].Text;
+            RequestLine rl = GetRequest(UInt16.Parse(requestNr));
+
+            if(rl != null)
+            {
+                remoteServer.ChangeRequestState(rl);
+            } else
+            {
+                Console.WriteLine("[BarKitchenApp] Unable to change request state");
+            }
+        }
+
         private List<RequestLine> GetAllActiveRequests()
         {
             List<RequestLine> arList = new List<RequestLine>();
@@ -88,31 +102,12 @@ namespace BarKitchenClient
 
             return arList;
         }
-        
-        
 
-        private void ShowRequests()
+        private RequestLine GetRequest(ushort requestNr)
         {
-            ListViewItem item1 = new ListViewItem("Something");
-            item1.SubItems.Add("SubItem1a");
-            item1.SubItems.Add("SubItem1b");
-
-
-            ListViewItem item2 = new ListViewItem("Something2");
-            item2.SubItems.Add("SubItem2a");
-            item2.SubItems.Add("SubItem2b");
-
-            ListViewItem item3 = new ListViewItem("Something3");
-            item3.SubItems.Add("SubItem3a");
-            item3.SubItems.Add("SubItem3b");
-
-            listView1.Items.AddRange(new ListViewItem[] { item1, item2, item3 });
+            return activeRequestList.FirstOrDefault(r => r.RequestNr == requestNr);
         }
 
-        private void updateRequestState_Click(object sender, EventArgs e)
-        {
-
-        }
     }
 
     class RemoteNew
