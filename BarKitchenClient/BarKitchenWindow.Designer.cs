@@ -53,8 +53,8 @@
             this.service});
             this.listView1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listView1.FullRowSelect = true;
-            this.listView1.MultiSelect = false;
             this.listView1.Location = new System.Drawing.Point(3, 54);
+            this.listView1.MultiSelect = false;
             this.listView1.Name = "listView1";
             this.listView1.Size = new System.Drawing.Size(828, 456);
             this.listView1.TabIndex = 0;
@@ -134,7 +134,7 @@
             this.ClientSize = new System.Drawing.Size(834, 565);
             this.Controls.Add(this.tableLayoutPanel1);
             this.Name = "BarKitchenWindow";
-            this.Text = "Form1";
+            this.Text = "Bar Kitchen App";
             this.Load += new System.EventHandler(this.BarKitchenWindow_Load);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.flowLayoutPanel2.ResumeLayout(false);
