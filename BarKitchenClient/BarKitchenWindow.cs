@@ -13,9 +13,6 @@ namespace BarKitchenClient
         // Remote server interface
         ISingleServer remoteServer;
 
-        // Restaurant tables list
-        Table[] restaurantTables;
-
         // Restaurant product list
         List<Product> restaurantProducts;
 
@@ -25,12 +22,16 @@ namespace BarKitchenClient
 
         public BarKitchenWindow()
         {
+            restaurantProducts = new List<Product>();
+            activeRequestList = new List<RequestLine>();
+
             // Client configuration file
             RemotingConfiguration.Configure("BarKitchenClient.exe.config", false);
 
             try {
                 // Remote Server object initialization
                 remoteServer = (ISingleServer)RemoteNew.New(typeof(ISingleServer));
+
             } catch(RemotingException e)
             {
                 Console.WriteLine(e.GetType().FullName);
@@ -43,8 +44,18 @@ namespace BarKitchenClient
 
         private void BarKitchenWindow_Load(object sender, EventArgs e)
         {
-            // Get active requests from server and update listview on the app window
-            updateRequestListView();
+            try {
+                // Get Restaurant products
+                restaurantProducts = remoteServer.GetProducts();
+
+                // Get active requests from server and update listview on the app window
+                updateRequestListView();
+
+            } catch(RemotingException ex)
+            {
+                Console.WriteLine(ex.GetType().FullName);
+                Console.WriteLine(ex.Message);
+            }
         }
 
         private void updateRequestState_Click(object sender, EventArgs e)
@@ -64,42 +75,6 @@ namespace BarKitchenClient
             }
         }
 
-        private void GetAllActiveRequests()
-        {
-            try
-            {
-                // Restaurant Tables
-                restaurantTables = remoteServer.GetRestaurantTables();
-
-                // Restaurant Products
-                restaurantProducts = remoteServer.GetProducts();
-
-                activeRequestList = new List<RequestLine>();
-
-                foreach (Table t in restaurantTables)
-                {
-                    List<RequestLine> temp = t.getRequests();
-
-                    foreach (RequestLine r in temp)
-                    {
-                        if (r.RState == RequestState.Waiting || r.RState == RequestState.InProgress)
-                        {
-                            activeRequestList.Add(r);
-                        }
-                    }
-
-                    temp.Clear();
-                }
-                
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.GetType().FullName);
-                Console.WriteLine(e.Message);
-            }
-            
-        }
-
         private RequestLine GetRequest(ushort requestNr)
         {
             return activeRequestList.FirstOrDefault(r => r.RequestNr == requestNr);
@@ -107,9 +82,11 @@ namespace BarKitchenClient
 
         private void updateRequestListView()
         {
-            
+
+            // TODO Get service type for function parameter
+            activeRequestList = remoteServer.GetActiveRequests(PreparationRoomID.Bar);
+
             listView1.Items.Clear();
-            GetAllActiveRequests();
 
             foreach (RequestLine r in activeRequestList)
             {

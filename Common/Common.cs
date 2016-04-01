@@ -154,7 +154,7 @@ public interface ISingleServer
     bool RequestBill(ushort tableNr);
     void SetRequestDelivered(int tblNr, ushort rNumber);
 
-    Table[] GetRestaurantTables();
+    List<RequestLine> GetActiveRequests(PreparationRoomID service);
 }
 
 public interface IRoomService
