@@ -83,6 +83,7 @@ public class SingleServer : MarshalByRefObject, ISingleServer
 
         //testing purposes while no restaurant/bar implementation
         ChangeRequestState(rl);
+        /*
         List<RequestLine> tableRls = tables[rl.TableNr].getRequests();
         if (tableRls.Count > 1)
         {
@@ -90,6 +91,8 @@ public class SingleServer : MarshalByRefObject, ISingleServer
             tables[rl.TableNr].changeRequestState(tableRls[previous].RequestNr);
             ChangeRequestState(tableRls[previous]);
         }
+        */
+
     }
 
     public void ChangeRequestState(RequestLine rl)
@@ -153,8 +156,26 @@ public class SingleServer : MarshalByRefObject, ISingleServer
 
     }
 
-    Table[] ISingleServer.GetRestaurantTables()
+    List<RequestLine> ISingleServer.GetActiveRequests(PreparationRoomID service)
     {
-        return tables;
+        List<RequestLine> activeRequestList = new List<RequestLine>();
+
+        foreach (Table t in tables)
+        {
+            List<RequestLine> temp = t.getRequests();
+
+            foreach (RequestLine r in temp)
+            {
+                if (r.RState == RequestState.Waiting || r.RState == RequestState.InProgress)
+                {
+                    activeRequestList.Add(r);
+                }
+            }
+
+            temp.Clear();
+        }
+
+        return activeRequestList;
     }
+
 }
