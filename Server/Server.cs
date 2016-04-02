@@ -27,9 +27,8 @@ public class SingleServer : MarshalByRefObject, ISingleServer
     List<List<RequestLine>> bills = new List<List<RequestLine>>();
 
     public event RequestReadyDelegate requestReadyEvent;
-    public event BarRequestDelegate barRequestEvent;
-    public event RestaurantDelegate restaurantRequestEvent;
-
+    public event BarKitchenDelegate barKitchenEvent;
+    
     public SingleServer()
     {
         CreateProducts();
@@ -83,17 +82,8 @@ public class SingleServer : MarshalByRefObject, ISingleServer
         rl.RequestNr = NrRequests++;
         tables[rl.TableNr].insertNewRequest(rl);
 
-        //testing purposes while no restaurant/bar implementation
         ChangeRequestState(rl);
-        /*
-        List<RequestLine> tableRls = tables[rl.TableNr].getRequests();
-        if (tableRls.Count > 1)
-        {
-            int previous = tableRls.Count - 2;
-            tables[rl.TableNr].changeRequestState(tableRls[previous].RequestNr);
-            ChangeRequestState(tableRls[previous]);
-        }
-        */
+        NotifyBarKitchen(rl);
 
     }
 
@@ -180,6 +170,34 @@ public class SingleServer : MarshalByRefObject, ISingleServer
         }
 
         return activeRequestList;
+    }
+
+    private void NotifyBarKitchen(RequestLine rl)
+    {
+        PreparationRoomID ps = products[rl.Prod].PreparationSource;
+
+        if (barKitchenEvent != null)
+        {
+            Delegate[] invkList = barKitchenEvent.GetInvocationList();
+
+            foreach (BarKitchenDelegate handler in invkList)
+            {
+                new Thread(() =>
+                {
+                    try
+                    {
+                        handler(ps, rl);
+                        Console.WriteLine("Invoking event handler");
+                    }
+                    catch (Exception)
+                    {
+                        barKitchenEvent -= handler;
+                        Console.WriteLine("Exception: Removed an event handler");
+                    }
+                }).Start();
+            } 
+        }
+
     }
 
     #endregion

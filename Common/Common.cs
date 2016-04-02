@@ -129,24 +129,44 @@ public class Table
     }
 }
 
-#region delegates
-public delegate void RequestReadyDelegate(RequestLine rl);
-public delegate void BarRequestDelegate(RequestLine rl);
-public delegate void RestaurantDelegate(RequestLine rl);
-public delegate void RequestDeliveredDelegate(RequestLine rl);
+#region Room Service Delegates
 
+public delegate void RequestReadyDelegate(RequestLine rl);
+public delegate void RequestDeliveredDelegate(RequestLine rl);
 
 public delegate void NrTablesDelegate(ushort n);
 public delegate void ProductListDelegate(List<Product> lp);
+
 #endregion
 
+#region Bar Kitchen Delegates
+
+public delegate void BarKitchenDelegate(PreparationRoomID prId,RequestLine rl);
+
+public class BarKitchenEventRepeater : MarshalByRefObject
+{
+    public event BarKitchenDelegate BarKitchenEvent;
+
+    public override object InitializeLifetimeService()
+    {
+        return null;
+    }
+
+    public void Repeater(PreparationRoomID pr, RequestLine rl)
+    {
+        if (BarKitchenEvent != null)
+            BarKitchenEvent(pr, rl);
+    }
+}
+
+#endregion
 
 #region Interfaces
 public interface ISingleServer
 {
     event RequestReadyDelegate requestReadyEvent;
-    event BarRequestDelegate barRequestEvent;
-    event RestaurantDelegate restaurantRequestEvent;
+    event BarKitchenDelegate barKitchenEvent;
+    
     void ChangeRequestState(RequestLine rl);
     void MakeRequest(RequestLine rl);
     ushort GetNrTables();

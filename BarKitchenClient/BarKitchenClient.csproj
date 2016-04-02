@@ -87,10 +87,6 @@
       <Project>{27f2b2df-b076-4d33-a7d3-4db470d7d994}</Project>
       <Name>Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Server\RegisterServer.csproj">
-      <Project>{2a45168d-4962-436d-9c96-eadbe2326e5d}</Project>
-      <Name>RegisterServer</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

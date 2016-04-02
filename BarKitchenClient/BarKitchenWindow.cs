@@ -18,9 +18,15 @@ namespace BarKitchenClient
 
         // Active request list
         List<RequestLine> activeRequestList;
-        #endregion
 
-        // TODO Set infinite lifetime
+        // BarKitchenEvent Repeater
+        BarKitchenEventRepeater bkRepeater;
+
+        // Delegate for adding row to listview 
+        private delegate ListViewItem AddListViewRowDelegate(ListViewItem lvItem);
+
+        #endregion
+      
         public BarKitchenWindow()
         {
             restaurantProducts = new List<Product>();
@@ -28,7 +34,6 @@ namespace BarKitchenClient
 
             try
             {
-
                 // Client configuration file
                 RemotingConfiguration.Configure("BarKitchenClient.exe.config", false);
 
@@ -41,6 +46,11 @@ namespace BarKitchenClient
                 // TODO Get service type for function parameter
                 activeRequestList = remoteServer.GetActiveRequests(PreparationRoomID.Bar);
 
+                //Subscribe remote server events
+                bkRepeater = new BarKitchenEventRepeater();
+                bkRepeater.BarKitchenEvent += new BarKitchenDelegate(addRequestListView);
+                remoteServer.barKitchenEvent += new BarKitchenDelegate(bkRepeater.Repeater);
+                
             }
             catch (Exception e)
             {
@@ -121,6 +131,18 @@ namespace BarKitchenClient
                     restaurantProducts[r.Prod].Name, r.Qtt.ToString(), r.RState.ToString(), restaurantProducts[r.Prod].PreparationSource.ToString() });
                 listView1.Items.Add(lvItem);
             }
+        }
+
+        private void addRequestListView(PreparationRoomID pr, RequestLine rl)
+        {
+            // TODO Get service type for function parameter
+
+            ListViewItem lvItem = new ListViewItem(new string[] { rl.RequestNr.ToString(), rl.TableNr.ToString(),
+                    restaurantProducts[rl.Prod].Name, rl.Qtt.ToString(), rl.RState.ToString(), restaurantProducts[rl.Prod].PreparationSource.ToString() });
+
+            AddListViewRowDelegate addRow = new AddListViewRowDelegate(listView1.Items.Add);
+            BeginInvoke(addRow, new object[] { lvItem });
+
         }
 
     }
