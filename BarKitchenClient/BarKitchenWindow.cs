@@ -20,22 +20,33 @@ namespace BarKitchenClient
         List<RequestLine> activeRequestList;
         #endregion
 
+        // TODO Set infinite lifetime
         public BarKitchenWindow()
         {
             restaurantProducts = new List<Product>();
             activeRequestList = new List<RequestLine>();
 
-            // Client configuration file
-            RemotingConfiguration.Configure("BarKitchenClient.exe.config", false);
+            try
+            {
 
-            try {
+                // Client configuration file
+                RemotingConfiguration.Configure("BarKitchenClient.exe.config", false);
+
                 // Remote Server object initialization
                 remoteServer = (ISingleServer)RemoteNew.New(typeof(ISingleServer));
 
-            } catch(RemotingException e)
+                // Get Restaurant products
+                restaurantProducts = remoteServer.GetProducts();
+
+                // TODO Get service type for function parameter
+                activeRequestList = remoteServer.GetActiveRequests(PreparationRoomID.Bar);
+
+            }
+            catch (Exception e)
             {
                 Console.WriteLine(e.GetType().FullName);
                 Console.WriteLine(e.Message);
+                Application.Exit();
             }
 
             // Windows Forms initialization
@@ -44,17 +55,11 @@ namespace BarKitchenClient
 
         private void BarKitchenWindow_Load(object sender, EventArgs e)
         {
-            try {
-                // Get Restaurant products
-                restaurantProducts = remoteServer.GetProducts();
-
-                // Get active requests from server and update listview on the app window
-                updateRequestListView();
-
-            } catch(RemotingException ex)
+            foreach (RequestLine r in activeRequestList)
             {
-                Console.WriteLine(ex.GetType().FullName);
-                Console.WriteLine(ex.Message);
+                ListViewItem lvItem = new ListViewItem(new string[] { r.RequestNr.ToString(), r.TableNr.ToString(),
+                    restaurantProducts[r.Prod].Name, r.Qtt.ToString(), r.RState.ToString(), restaurantProducts[r.Prod].PreparationSource.ToString() });
+                listView1.Items.Add(lvItem);
             }
         }
 
@@ -65,11 +70,23 @@ namespace BarKitchenClient
             String requestNr = listView1.SelectedItems[0].Text;
             RequestLine rl = GetRequest(UInt16.Parse(requestNr));
 
-            if(rl != null)
+            if (rl != null)
             {
-                remoteServer.ChangeRequestState(rl);
+
+                RequestState rs = rl.RState;
+                
+                if(rs == RequestState.Waiting)
+                {
+                    rl.RState = RequestState.InProgress;
+                } else if(rs == RequestState.InProgress)
+                {
+                    rl.RState = RequestState.Ready;
+                }
+                
                 updateRequestListView();
-            } else
+                
+            }
+            else
             {
                 Console.WriteLine("[BarKitchenApp] Unable to change request state");
             }
@@ -106,7 +123,7 @@ namespace BarKitchenClient
         {
             types = new Hashtable();
 
-            foreach(WellKnownClientTypeEntry entry in RemotingConfiguration.GetRegisteredWellKnownClientTypes())
+            foreach (WellKnownClientTypeEntry entry in RemotingConfiguration.GetRegisteredWellKnownClientTypes())
             {
                 types.Add(entry.ObjectType, entry);
             }
@@ -114,14 +131,14 @@ namespace BarKitchenClient
 
         public static object New(Type type)
         {
-            if(types == null)
+            if (types == null)
             {
                 InitTypeTable();
             }
 
-            WellKnownClientTypeEntry entry = (WellKnownClientTypeEntry) types[type];
+            WellKnownClientTypeEntry entry = (WellKnownClientTypeEntry)types[type];
 
-            if(entry == null)
+            if (entry == null)
             {
                 throw new RemotingException("Type not found!");
             }

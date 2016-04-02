@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Runtime.Remoting;
 using System.Threading;
 
+using System.Linq;
+
 class Server
 {
     static void Main(string[] args)
@@ -156,6 +158,9 @@ public class SingleServer : MarshalByRefObject, ISingleServer
 
     }
 
+    #region Bar Kitchen Methods Definition
+
+    // From all table requests returns requests with waiting or in progress status
     List<RequestLine> ISingleServer.GetActiveRequests(PreparationRoomID service)
     {
         List<RequestLine> activeRequestList = new List<RequestLine>();
@@ -172,10 +177,11 @@ public class SingleServer : MarshalByRefObject, ISingleServer
                 }
             }
 
-            temp.Clear();
         }
 
         return activeRequestList;
     }
+
+    #endregion
 
 }
