@@ -80,12 +80,8 @@ namespace BarKitchenClient
 
         private void updateRequestState_Click(object sender, EventArgs e)
         {
-            
-            if (listView1.SelectedItems.Count < 1)
-            {
-                MessageBox.Show("Please select a row", "Bar Kitchen App - Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
+
+            if (listView1.SelectedItems.Count < 1) return;
 
             String requestNr = listView1.SelectedItems[0].Text;
             RequestLine rl = GetRequest(UInt16.Parse(requestNr));
