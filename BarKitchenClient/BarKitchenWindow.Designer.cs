@@ -125,7 +125,7 @@
             this.button1.TabIndex = 0;
             this.button1.Text = "Actualizar Estado";
             this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.updateRequestState_Click);
+            this.button1.Click += new System.EventHandler(this.UpdateRequestState_Click);
             // 
             // BarKitchenWindow
             // 

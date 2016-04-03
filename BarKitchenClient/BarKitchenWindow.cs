@@ -12,32 +12,32 @@ namespace BarKitchenClient
         #region Attributes
 
         // Remote server interface
-        ISingleServer remoteServer;
+        ISingleServer RemoteServer;
 
         // Restaurant product list
-        List<Product> restaurantProducts;
+        List<Product> RestaurantProducts;
 
         // Active request list
-        List<RequestLine> activeRequestList;
+        List<RequestLine> ActiveRequestList;
 
         // BarKitchenEvent Repeater
-        BarKitchenEventRepeater bkRepeater;
+        BarKitchenEventRepeater BarKitchenRepeater;
 
         // Delegate for adding row to listview
         private delegate ListViewItem AddListViewRowDelegate(ListViewItem lvItem);
 
         // List View Columns
-        enum lvColumn { Request, Table, Product, Quantity, State, Service}
+        enum LvColumn { Request, Table, Product, Quantity, State, Service}
 
         // Service Type (Bar or Kitchen)
-        private PreparationRoomID serviceType { get; set; }
+        private PreparationRoomID ServiceType { get; set; }
 
         #endregion
 
         public BarKitchenWindow()
         {
-            restaurantProducts = new List<Product>();
-            activeRequestList = new List<RequestLine>();
+            RestaurantProducts = new List<Product>();
+            ActiveRequestList = new List<RequestLine>();
 
             try
             {
@@ -45,19 +45,19 @@ namespace BarKitchenClient
                 RemotingConfiguration.Configure("BarKitchenClient.exe.config", false);
 
                 // Remote Server object initialization
-                remoteServer = (ISingleServer)RemoteNew.New(typeof(ISingleServer));
+                RemoteServer = (ISingleServer)RemoteNew.New(typeof(ISingleServer));
 
                 // Get Restaurant products
-                restaurantProducts = remoteServer.GetProducts();
+                RestaurantProducts = RemoteServer.GetProducts();
 
                 // TODO Get service type for function parameter
-                serviceType = PreparationRoomID.Bar;
-                activeRequestList = remoteServer.GetActiveRequests(serviceType);
+                ServiceType = PreparationRoomID.Bar;
+                ActiveRequestList = RemoteServer.GetActiveRequests(ServiceType);
 
                 //Subscribe remote server events
-                bkRepeater = new BarKitchenEventRepeater();
-                bkRepeater.BarKitchenEvent += new BarKitchenDelegate(updateListView);
-                remoteServer.barKitchenEvent += new BarKitchenDelegate(bkRepeater.Repeater);
+                BarKitchenRepeater = new BarKitchenEventRepeater();
+                BarKitchenRepeater.BarKitchenEvent += new BarKitchenDelegate(UpdateListView);
+                RemoteServer.barKitchenEvent += new BarKitchenDelegate(BarKitchenRepeater.Repeater);
                 
             }
             catch (Exception e)
@@ -78,26 +78,26 @@ namespace BarKitchenClient
 
         private void BarKitchenWindow_Load(object sender, EventArgs e)
         {
-            foreach (RequestLine r in activeRequestList)
+            foreach (RequestLine r in ActiveRequestList)
             {
                 ListViewItem lvItem = new ListViewItem(new string[] { r.RequestNr.ToString(), r.TableNr.ToString(),
-                    restaurantProducts[r.Prod].Name, r.Qtt.ToString(), r.RState.ToString(), restaurantProducts[r.Prod].PreparationSource.ToString() });
+                    RestaurantProducts[r.Prod].Name, r.Qtt.ToString(), r.RState.ToString(), RestaurantProducts[r.Prod].PreparationSource.ToString() });
                 listView1.Items.Add(lvItem);
             }
         }
 
-        private void updateRequestState_Click(object sender, EventArgs e)
+        private void UpdateRequestState_Click(object sender, EventArgs e)
         {
             // Check if a row is selected
             if (listView1.SelectedItems.Count < 1) return;
 
-            String tableNr = listView1.SelectedItems[0].SubItems[(int)lvColumn.Table].Text;
-            String requestNr = listView1.SelectedItems[0].SubItems[(int)lvColumn.Request].Text;
+            String tableNr = listView1.SelectedItems[0].SubItems[(int)LvColumn.Table].Text;
+            String requestNr = listView1.SelectedItems[0].SubItems[(int)LvColumn.Request].Text;
            
-            remoteServer.UpdateRequestLineState(UInt16.Parse(tableNr), UInt16.Parse(requestNr));
+            RemoteServer.UpdateRequestLineState(UInt16.Parse(tableNr), UInt16.Parse(requestNr));
         }
 
-        private void updateListView(RequestLine rl)
+        private void UpdateListView(RequestLine rl)
         {
             // TODO Get service type for function parameter
 
@@ -106,10 +106,7 @@ namespace BarKitchenClient
             switch (rs)
             {
                 case RequestState.Waiting:
-                    ListViewItem lvItem = new ListViewItem(new string[] { rl.RequestNr.ToString(), rl.TableNr.ToString(),
-                    restaurantProducts[rl.Prod].Name, rl.Qtt.ToString(), rl.RState.ToString(), restaurantProducts[rl.Prod].PreparationSource.ToString() });
-                    AddListViewRowDelegate addRow = new AddListViewRowDelegate(listView1.Items.Add);
-                    BeginInvoke(addRow, new object[] { lvItem });
+                    AddRowListView(rl);
                     break;
                 case RequestState.InProgress:
                     break;
@@ -121,6 +118,15 @@ namespace BarKitchenClient
                     break;
             }
         }
+
+        private void AddRowListView(RequestLine rl)
+        {
+            ListViewItem lvItem = new ListViewItem(new string[] { rl.RequestNr.ToString(), rl.TableNr.ToString(),
+                    RestaurantProducts[rl.Prod].Name, rl.Qtt.ToString(), rl.RState.ToString(), RestaurantProducts[rl.Prod].PreparationSource.ToString() });
+            AddListViewRowDelegate addRow = new AddListViewRowDelegate(listView1.Items.Add);
+            BeginInvoke(addRow, new object[] { lvItem });
+        }
+
 
     }
 
