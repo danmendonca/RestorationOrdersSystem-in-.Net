@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 
 
+
 #region Enums
 [Serializable]
-public enum PreparationRoomID { Bar, Restaurant };
+public enum PreparationRoomID { Bar, Kitchen };
 [Serializable]
 public enum TableStateID { Available, Paying };
 [Serializable]
@@ -151,25 +152,28 @@ public class RequestLine : MarshalByRefObject
                 return false;
         }
     }
-}
+    }
 
 [Serializable]
 public class Table
 {
     #region properties
+
     public ushort TableNr { get; private set; }
     public TableStateID TblState { get; private set; }
+
     #endregion
 
 
 
     #region attributes
+
     protected List<RequestLine> requests = new List<RequestLine>();
+
     #endregion
 
 
 
-    #region classMethods
     public Table(ushort tblNr)
     {
         TblState = TableStateID.Available;
@@ -210,7 +214,6 @@ public class Table
         this.requests = new List<RequestLine>();
     }
 
-
     public void changeRequestState(ushort rNr)
     {
         foreach (RequestLine rl in requests)
@@ -221,21 +224,41 @@ public class Table
             break;
         }
     }
-    #endregion
+
 }
 #endregion
 
 
 
-#region delegates
+#region Room Service Delegates
 public delegate void RequestReadyDelegate(RequestLine rl);
-public delegate void BarRequestDelegate(RequestLine rl);
-public delegate void RestaurantDelegate(RequestLine rl);
 public delegate void RequestDeliveredDelegate(RequestLine rl);
-
-
 public delegate void NrTablesDelegate(ushort n);
 public delegate void ProductListDelegate(List<Product> lp);
+#endregion
+
+
+
+#region Bar Kitchen Delegates
+
+public delegate void BarKitchenDelegate(RequestLine rl);
+
+public class BarKitchenEventRepeater : MarshalByRefObject
+{
+    public event BarKitchenDelegate BarKitchenEvent;
+
+    public override object InitializeLifetimeService()
+    {
+        return null;
+    }
+
+    public void Repeater(RequestLine rl)
+    {
+        if (BarKitchenEvent != null)
+            BarKitchenEvent(rl);
+    }
+}
+
 #endregion
 
 
@@ -245,18 +268,18 @@ public interface ISingleServer
 {
     #region events
     event RequestReadyDelegate requestReadyEvent;
-    event BarRequestDelegate barRequestEvent;
-    event RestaurantDelegate restaurantRequestEvent;
+    event BarKitchenDelegate barKitchenEvent;
     #endregion
 
-    #region interfaceMethods
     bool RequestBill(ushort tableNr);
+    List<RequestLine> GetActiveRequests(PreparationRoomID service);
     List<Product> GetProducts();
     ushort GetNrTables();
     void ChangeRequestState(RequestLine rl);
     void MakeRequest(RequestLine rl);
     void SetRequestDelivered(int tblNr, ushort rNumber);
-    #endregion
+    void UpdateRequestLineState(int tableNr, int requestNr);
+
 }
 
 

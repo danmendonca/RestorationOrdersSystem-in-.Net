@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Runtime.Remoting;
 using System.Threading;
 
+using System.Linq;
+
 class Server
 {
     static void Main(string[] args)
@@ -25,9 +27,8 @@ public class SingleServer : MarshalByRefObject, ISingleServer
     List<List<RequestLine>> bills = new List<List<RequestLine>>();
 
     public event RequestReadyDelegate requestReadyEvent;
-    public event BarRequestDelegate barRequestEvent;
-    public event RestaurantDelegate restaurantRequestEvent;
-
+    public event BarKitchenDelegate barKitchenEvent;
+    
     public SingleServer()
     {
         CreateProducts();
@@ -47,11 +48,11 @@ public class SingleServer : MarshalByRefObject, ISingleServer
         if (products.Count > 0)
             return;
 
-        Product p1 = new Product("Francesinha", 9.5f, PreparationRoomID.Restaurant);
+        Product p1 = new Product("Francesinha", 9.5f, PreparationRoomID.Kitchen);
         products.Add(p1);
-        Product p2 = new Product("Pica-Pau", 7.0f, PreparationRoomID.Restaurant);
+        Product p2 = new Product("Pica-Pau", 7.0f, PreparationRoomID.Kitchen);
         products.Add(p2);
-        Product p3 = new Product("Sopa", 2.5f, PreparationRoomID.Restaurant);
+        Product p3 = new Product("Sopa", 2.5f, PreparationRoomID.Kitchen);
         products.Add(p3);
         Product p4 = new Product("Tosta Mista", 1.5f, PreparationRoomID.Bar);
         products.Add(p4);
@@ -82,15 +83,9 @@ public class SingleServer : MarshalByRefObject, ISingleServer
         rl.RequestNr = NrRequests++;
         tables[rl.TableNr].insertNewRequest(rl);
 
-        //testing purposes while no restaurant/bar implementation
         ChangeRequestState(rl);
-        List<RequestLine> tableRls = tables[rl.TableNr].getRequests();
-        if (tableRls.Count > 1)
-        {
-            int previous = tableRls.Count - 2;
-            tables[rl.TableNr].changeRequestState(tableRls[previous].RequestNr);
-            ChangeRequestState(tableRls[previous]);
-        }
+        NotifyBarKitchen(rl);
+
     }
 
     public void ChangeRequestState(RequestLine rl)
@@ -153,4 +148,80 @@ public class SingleServer : MarshalByRefObject, ISingleServer
 
 
     }
+
+    #region Bar Kitchen Methods Definition
+
+    private RequestLine GetRequest(int tableNr, int requestNr)
+    {
+        return tables[tableNr].getRequests().FirstOrDefault(r => r.RequestNr == requestNr);
+    }
+
+    // From all table requests returns requests with waiting or in progress status
+    List<RequestLine> ISingleServer.GetActiveRequests(PreparationRoomID service)
+    {
+        List<RequestLine> activeRequestList = new List<RequestLine>();
+
+        foreach (Table t in tables)
+        {
+            List<RequestLine> temp = t.getRequests();
+
+            foreach (RequestLine r in temp)
+            {
+                if (r.RState == RequestState.Waiting || r.RState == RequestState.InProgress)
+                {
+                    activeRequestList.Add(r);
+                }
+            }
+
+        }
+
+        return activeRequestList;
+    }
+
+    void ISingleServer.UpdateRequestLineState(int tableNr, int requestNr)
+    {
+        RequestLine rl = GetRequest(tableNr, requestNr);
+
+        if(rl != null)
+        {
+            rl.changeState();
+            NotifyBarKitchen(rl);
+
+            ChangeRequestState(rl);
+
+        }
+        else
+        {
+            Console.WriteLine("[Server] Unable to change request line state");
+        }
+    }
+
+    private void NotifyBarKitchen(RequestLine rl)
+    {
+        if (barKitchenEvent != null)
+        {
+            Delegate[] invkList = barKitchenEvent.GetInvocationList();
+
+            foreach (BarKitchenDelegate handler in invkList)
+            {
+                new Thread(() =>
+                {
+                    try
+                    {
+                        handler(rl);
+                        Console.WriteLine("Invoking event handler");
+                    }
+                    catch (Exception)
+                    {
+                        barKitchenEvent -= handler;
+                        Console.WriteLine("Exception: Removed an event handler");
+                    }
+                }).Start();
+            } 
+        }
+    }
+
+    #endregion
+
 }
+
