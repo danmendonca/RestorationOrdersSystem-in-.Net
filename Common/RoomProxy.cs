@@ -10,7 +10,7 @@ public class RoomProxy : MarshalByRefObject, IRoomService
     {
         if (rREvent == null)
         {
-            Console.WriteLine("No subscribers ");
+            Console.WriteLine("Repeater: No subscribers");
             return;
         }
 
@@ -24,8 +24,9 @@ public class RoomProxy : MarshalByRefObject, IRoomService
                 {
                     handler(rl);
                 }
-                catch (Exception)
+                catch (Exception exception)
                 {
+                    Console.WriteLine(exception.StackTrace);
                     rREvent -= handler;
                 }
             }).Start();

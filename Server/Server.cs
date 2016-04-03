@@ -73,8 +73,9 @@ public class SingleServer : MarshalByRefObject, ISingleServer
         tables[t].ClearRequests();
     }
 
-    void ISingleServer.MakeRequest(RequestLine rl)
+    void ISingleServer.MakeRequest(RequestLine newRL)
     {
+        RequestLine rl = new RequestLine(newRL);
         Console.WriteLine($"Added new request to table {rl.TableNr} for {rl.Qtt} of {products[rl.Prod]}");
         if (rl.TableNr > NrTables || tables[rl.TableNr].TblState != TableStateID.Available)
             return;

@@ -1,19 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
 
+
+#region Enums
 [Serializable]
 public enum PreparationRoomID { Bar, Restaurant };
 [Serializable]
 public enum TableStateID { Available, Paying };
 [Serializable]
 public enum RequestState { Waiting, InProgress, Ready, Delivered };
+#endregion
 
+
+
+#region classes
 [Serializable]
 public class Product
 {
+    #region Properties
     public string Name { get; protected set; }
     public float Price { get; protected set; }
-    PreparationRoomID PreparationSource { get; set; }
+    public PreparationRoomID PreparationSource { get; set; }
+    #endregion
 
     public Product(string name, float price, PreparationRoomID PreparationSource)
     {
@@ -22,6 +30,7 @@ public class Product
         this.PreparationSource = PreparationSource;
     }
 
+
     public override string ToString()
     {
         return $"{Name} {Price,3}€";
@@ -29,16 +38,77 @@ public class Product
 }
 
 [Serializable]
-
 public class RequestLine : MarshalByRefObject
 {
+
+    #region attributes
+    private RequestState _requestState;
+    #endregion
+
+
+
+    #region Properties
     public ushort Prod { get; protected set; }
     public int Qtt { get; protected set; }
     public ushort RequestNr { get; set; }
     public string Description { get; private set; }
-    public RequestState RState { get; set; }
+    public RequestState RState
+    {
+        get { return _requestState; }
+        set
+        {
+            switch (value)
+            {
+                case RequestState.Waiting:
+                    _requestState = value;
+                    break;
+                case RequestState.InProgress:
+                    if (RState == RequestState.Waiting)
+                        _requestState = value;
+                    break;
+                case RequestState.Ready:
+                    if (RState != RequestState.Delivered)
+                        _requestState = value;
+                    break;
+                case RequestState.Delivered:
+                    _requestState = value;
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
     public int TableNr { get; set; }
+    #endregion
 
+
+
+    #region overrides
+    public override bool Equals(object obj)
+    {
+        // Check for null values and compare run-time types.
+        if (obj == null || GetType() != obj.GetType())
+            return false;
+
+        return (this.RequestNr == ((RequestLine)obj).RequestNr) ? true : false;
+    }
+
+
+    public override int GetHashCode()
+    {
+        return Convert.ToInt32(RequestNr);
+    }
+
+
+    public override string ToString()
+    {
+        return $"{Prod.ToString(),10} {Qtt,3} {TableNr,2}";
+    }
+    #endregion
+
+
+
+    #region constructor
     public RequestLine(ushort requestNr, ushort prodIndex, int qtt, ushort tblNr, string desc)
     {
         Prod = prodIndex;
@@ -52,6 +122,20 @@ public class RequestLine : MarshalByRefObject
 
         RState = RequestState.Waiting;
     }
+    public RequestLine(RequestLine rl)
+    {
+        Prod = rl.Prod;
+        Qtt = rl.Qtt;
+        TableNr = rl.TableNr;
+        RequestNr = rl.RequestNr;
+
+        if (rl.Description != null)
+            Description = rl.Description;
+        else Description = "";
+
+        RState = RequestState.Waiting;
+    }
+    #endregion
 
     public bool changeState()
     {
@@ -67,20 +151,25 @@ public class RequestLine : MarshalByRefObject
                 return false;
         }
     }
-
-    public override string ToString()
-    {
-        return $"{Prod.ToString(),10} {Qtt,3} {TableNr,2}";
-    }
 }
 
 [Serializable]
 public class Table
 {
+    #region properties
     public ushort TableNr { get; private set; }
     public TableStateID TblState { get; private set; }
-    protected List<RequestLine> requests = new List<RequestLine>();
+    #endregion
 
+
+
+    #region attributes
+    protected List<RequestLine> requests = new List<RequestLine>();
+    #endregion
+
+
+
+    #region classMethods
     public Table(ushort tblNr)
     {
         TblState = TableStateID.Available;
@@ -97,29 +186,34 @@ public class Table
         return true;
     }
 
+
     public void changeState()
     {
         TblState = (TblState == TableStateID.Available) ? TableStateID.Paying : TableStateID.Available;
     }
+
 
     public override string ToString()
     {
         return TableNr.ToString();
     }
 
+
     public List<RequestLine> getRequests()
     {
         return this.requests;
     }
+
 
     public void ClearRequests()
     {
         this.requests = new List<RequestLine>();
     }
 
+
     public void changeRequestState(ushort rNr)
     {
-        foreach(RequestLine rl in requests)
+        foreach (RequestLine rl in requests)
         {
             if (rl.RequestNr != rNr)
                 continue;
@@ -127,7 +221,11 @@ public class Table
             break;
         }
     }
+    #endregion
 }
+#endregion
+
+
 
 #region delegates
 public delegate void RequestReadyDelegate(RequestLine rl);
@@ -141,19 +239,26 @@ public delegate void ProductListDelegate(List<Product> lp);
 #endregion
 
 
+
 #region Interfaces
 public interface ISingleServer
 {
+    #region events
     event RequestReadyDelegate requestReadyEvent;
     event BarRequestDelegate barRequestEvent;
     event RestaurantDelegate restaurantRequestEvent;
+    #endregion
+
+    #region interfaceMethods
+    bool RequestBill(ushort tableNr);
+    List<Product> GetProducts();
+    ushort GetNrTables();
     void ChangeRequestState(RequestLine rl);
     void MakeRequest(RequestLine rl);
-    ushort GetNrTables();
-    List<Product> GetProducts();
-    bool RequestBill(ushort tableNr);
     void SetRequestDelivered(int tblNr, ushort rNumber);
+    #endregion
 }
+
 
 public interface IRoomService
 {

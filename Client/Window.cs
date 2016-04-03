@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Remoting;
 using System.Threading;
 using System.Windows.Forms;
@@ -10,6 +11,8 @@ public partial class Window : Form
     #region Statics
     private static String PTInProgress = "Preparação";
     private static String PTReady = "Pronto";
+    private static String PTDelivered = "Entregue";
+    private static String PTWaiting = "Em espera";
     private static int LISTVIEW_REQ_NR_INDEX = 0;
     private static int LISTVIEW_TABLE_INDEX = 1;
     private static int LISTVIEW_PRODUCT_INDEX = 2;
@@ -22,45 +25,50 @@ public partial class Window : Form
     #region Attributes
     Guid guid;
     ISingleServer registerServer;
-    public RoomProxy roomProxy;
-    private List<Product> ps { get; set; }
-    ushort nrTables = 0;
+    private RoomProxy _roomProxy;
+    private List<Product> _ps { get; set; }
+    private ushort _nrTables = 0;
+    private List<RequestLine> _requestLines;
 
     #endregion
 
 
+
+    #region initialization
     public override object InitializeLifetimeService()
     {
         return null;
     }
 
 
-
     public Window()
     {
         InitializeComponent();
         guid = Guid.NewGuid();
-
+        _requestLines = new List<RequestLine>();
         //create proxy to registerServer and subscribe its events
-        roomProxy = new RoomProxy();
-        roomProxy.rREvent += new RequestReadyDelegate(RoomProxy_rREvent);
-        roomProxy.rDEvent += new RequestDeliveredDelegate(RoomProxy_rDEvent);
+        _roomProxy = new RoomProxy();
+        _roomProxy.rREvent += new RequestReadyDelegate(RoomProxy_rREvent);
+        _roomProxy.rDEvent += new RequestDeliveredDelegate(RoomProxy_rDEvent);
 
         //reference to registerServer
         registerServer = (ISingleServer)RemoteNew.New(typeof(ISingleServer));
 
         //getting info from registerServer and update UI
-        ps = registerServer.GetProducts();
-        nrTables = registerServer.GetNrTables();
+        _ps = registerServer.GetProducts();
+        _nrTables = registerServer.GetNrTables();
         ChangeProductListUI();
         ChangeTableListUI();
 
         //subscribe proxy to registerServer events
-        RequestReadyDelegate rrd = new RequestReadyDelegate(roomProxy.RepeaterRReady);
+        RequestReadyDelegate rrd = new RequestReadyDelegate(_roomProxy.RepeaterRReady);
         registerServer.requestReadyEvent += rrd;
     }
+    #endregion
 
 
+
+    #region Update_listViewRequests
     private void RemoveReqFromLView(RequestLine rl)
     {
         if (InvokeRequired) BeginInvoke((MethodInvoker)delegate { RemoveReqFromLView(rl); });
@@ -75,6 +83,7 @@ public partial class Window : Form
         }
     }
 
+
     private void ChangeReqStateInLView(RequestLine rl)
     {
         if (InvokeRequired) BeginInvoke((MethodInvoker)delegate { ChangeReqStateInLView(rl); });
@@ -85,26 +94,58 @@ public partial class Window : Form
                 ushort reqNr = Convert.ToUInt16(listViewRequests.Items[i].SubItems[LISTVIEW_REQ_NR_INDEX].Text);
                 if (rl.RequestNr != reqNr) continue;
 
-                listViewRequests.Items[i].SubItems[LISTVIEW_STATE_INDEX].Text = PTReady;
+                listViewRequests.Items[i].SubItems[LISTVIEW_STATE_INDEX].Text = StateToString(rl);
                 break;
             }
         }
     }
 
-    private void AddReqToLView(RequestLine rl)
+
+    private void AddRequest(RequestLine rl)
     {
-        if (InvokeRequired) BeginInvoke((MethodInvoker)delegate { AddReqToLView(rl); });
+        _requestLines.Add(rl);
+    }
+
+
+    private void RemoveRequest(RequestLine rl)
+    {
+        _requestLines.Remove(rl);
+        RefreshListViewRequests();
+    }
+
+
+    private void RefreshListViewRequests()
+    {
+        ClearRequestLinesView();
+        foreach (var requestLine in _requestLines) AddOneReqToLView(requestLine);
+    }
+
+
+    private void ClearRequestLinesView()
+    {
+        if (InvokeRequired) BeginInvoke((MethodInvoker)delegate { ClearRequestLinesView(); });
         else
         {
-            ListViewItem lvi = new ListViewItem(rl.RequestNr.ToString());
-            lvi.SubItems.Add(rl.TableNr.ToString());
-            lvi.SubItems.Add(ps[rl.Prod].ToString());
-            lvi.SubItems.Add(rl.Qtt.ToString());
-            lvi.SubItems.Add(PTInProgress);
-
-            listViewRequests.Items.Add(lvi);
+            listViewRequests.Items.Clear();
         }
     }
+
+
+    private void AddOneReqToLView(RequestLine requestLine)
+    {
+        if (InvokeRequired) BeginInvoke((MethodInvoker)delegate { AddOneReqToLView(requestLine); });
+        else
+        {
+            ListViewItem lvi = new ListViewItem(requestLine.RequestNr.ToString());
+            lvi.SubItems.Add(requestLine.TableNr.ToString());
+            lvi.SubItems.Add(_ps[requestLine.Prod].ToString());
+            lvi.SubItems.Add(requestLine.Qtt.ToString());
+            string state = StateToString(requestLine);
+            listViewRequests.Items.Add(lvi);
+            Console.WriteLine($"added to reqView: {requestLine.ToString()}");
+        }
+    }
+    #endregion
 
 
 
@@ -119,8 +160,6 @@ public partial class Window : Form
         try
         {
             registerServer.MakeRequest(rl);
-            textBoxDescription.Text = "";
-            spinnerQuantity.Value = 1;
         }
         catch (Exception ex)
         {
@@ -155,7 +194,7 @@ public partial class Window : Form
         else
         {
             comboBoxTable.Items.Clear();
-            for (ushort i = 0; i < nrTables; i++) comboBoxTable.Items.Add($"Mesa {i.ToString(),2}");
+            for (ushort i = 0; i < _nrTables; i++) comboBoxTable.Items.Add($"Mesa {i.ToString(),2}");
         }
     }
 
@@ -167,10 +206,9 @@ public partial class Window : Form
         else
         {
             comboBoxProduct.Items.Clear();
-            foreach (Product p in ps) comboBoxProduct.Items.Add(p);
+            foreach (Product p in _ps) comboBoxProduct.Items.Add(p);
         }
     }
-
 
 
     private void btnAskBill_Click(object sender, EventArgs e)
@@ -192,11 +230,11 @@ public partial class Window : Form
 
 
 
+    //TODO not needed?
     private void RoomProxy_rDEvent(RequestLine rl)
     {
         throw new NotImplementedException();
     }
-
 
     private void RoomProxy_rREvent(RequestLine rl)
     {
@@ -204,24 +242,47 @@ public partial class Window : Form
         switch (rl.RState)
         {
             case RequestState.Waiting:
-                AddReqToLView(rl);
+                Console.WriteLine($"Adding new RequestLine.");
+                AddRequest(rl);
+                //TODO ADD ONE LINE TO THE VIEW OR REFRESH THE WHOLE VIEW?
+                RefreshListViewRequests();
                 break;
             case RequestState.Delivered:
-                RemoveReqFromLView(rl);
+                Console.WriteLine($"Removing new RequestLine.");
+                RemoveRequest(rl);
+                //TODO REMOVE ONE LINE OF THE VIEW OR REFRESH THE WHOLE VIEW?
+                RefreshListViewRequests();
+                //RemoveReqFromLView(requestLine);
                 break;
             default:
-                ChangeReqStateInLView(rl);
+                Console.WriteLine($"Updating new RequestLine.");
+                //TODO UPDATE ONE LINE OF THE VIEW OR REFRESH THE WHOLE VIEW?
+                //ChangeReqStateInLView(requestLine);
+                RefreshListViewRequests();
                 break;
         }
 
     }
-
-
-
-
-
     #endregion
 
+
+
+    #region helperMethods
+    private static string StateToString(RequestLine requestLine)
+    {
+        switch (requestLine.RState)
+        {
+            case RequestState.InProgress:
+                return PTInProgress;
+            case RequestState.Delivered:
+                return PTDelivered;
+            case RequestState.Ready:
+                return PTReady;
+            default:
+                return PTWaiting;
+        }
+    }
+    #endregion
 }
 
 class RemoteNew
