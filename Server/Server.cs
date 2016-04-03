@@ -185,6 +185,9 @@ public class SingleServer : MarshalByRefObject, ISingleServer
         {
             rl.changeState();
             NotifyBarKitchen(rl);
+
+            ChangeRequestState(rl);
+
         }
         else
         {
