@@ -150,6 +150,11 @@ public class SingleServer : MarshalByRefObject, ISingleServer
 
     #region Bar Kitchen Methods Definition
 
+    private RequestLine GetRequest(int tableNr, int requestNr)
+    {
+        return tables[tableNr].getRequests().FirstOrDefault(r => r.RequestNr == requestNr);
+    }
+
     // From all table requests returns requests with waiting or in progress status
     List<RequestLine> ISingleServer.GetActiveRequests(PreparationRoomID service)
     {
@@ -172,11 +177,23 @@ public class SingleServer : MarshalByRefObject, ISingleServer
         return activeRequestList;
     }
 
+    void ISingleServer.UpdateRequestLineState(int tableNr, int requestNr)
+    {
+        RequestLine rl = GetRequest(tableNr, requestNr);
+
+        if(rl != null)
+        {
+            rl.changeState();
+            NotifyBarKitchen(rl);
+        }
+        else
+        {
+            Console.WriteLine("[Server] Unable to change request line state");
+        }
+    }
+
     private void NotifyBarKitchen(RequestLine rl)
     {
-        PreparationRoomID ps = products[rl.Prod].PreparationSource;
-        RequestState rs = rl.RState;
-
         if (barKitchenEvent != null)
         {
             Delegate[] invkList = barKitchenEvent.GetInvocationList();
@@ -187,7 +204,7 @@ public class SingleServer : MarshalByRefObject, ISingleServer
                 {
                     try
                     {
-                        handler(rs, rl);
+                        handler(rl);
                         Console.WriteLine("Invoking event handler");
                     }
                     catch (Exception)
@@ -198,9 +215,9 @@ public class SingleServer : MarshalByRefObject, ISingleServer
                 }).Start();
             } 
         }
-
     }
 
     #endregion
 
 }
+

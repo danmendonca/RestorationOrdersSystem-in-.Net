@@ -141,7 +141,7 @@ public delegate void ProductListDelegate(List<Product> lp);
 
 #region Bar Kitchen Delegates
 
-public delegate void BarKitchenDelegate(RequestState rs,RequestLine rl);
+public delegate void BarKitchenDelegate(RequestLine rl);
 
 public class BarKitchenEventRepeater : MarshalByRefObject
 {
@@ -152,10 +152,10 @@ public class BarKitchenEventRepeater : MarshalByRefObject
         return null;
     }
 
-    public void Repeater(RequestState rs, RequestLine rl)
+    public void Repeater(RequestLine rl)
     {
         if (BarKitchenEvent != null)
-            BarKitchenEvent(rs, rl);
+            BarKitchenEvent(rl);
     }
 }
 
@@ -175,6 +175,9 @@ public interface ISingleServer
     void SetRequestDelivered(int tblNr, ushort rNumber);
 
     List<RequestLine> GetActiveRequests(PreparationRoomID service);
+
+    void UpdateRequestLineState(int tableNr, int requestNr);
+
 }
 
 public interface IRoomService
