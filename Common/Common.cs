@@ -141,7 +141,7 @@ public delegate void ProductListDelegate(List<Product> lp);
 
 #region Bar Kitchen Delegates
 
-public delegate void BarKitchenDelegate(PreparationRoomID prId,RequestLine rl);
+public delegate void BarKitchenDelegate(RequestState rs,RequestLine rl);
 
 public class BarKitchenEventRepeater : MarshalByRefObject
 {
@@ -152,10 +152,10 @@ public class BarKitchenEventRepeater : MarshalByRefObject
         return null;
     }
 
-    public void Repeater(PreparationRoomID pr, RequestLine rl)
+    public void Repeater(RequestState rs, RequestLine rl)
     {
         if (BarKitchenEvent != null)
-            BarKitchenEvent(pr, rl);
+            BarKitchenEvent(rs, rl);
     }
 }
 

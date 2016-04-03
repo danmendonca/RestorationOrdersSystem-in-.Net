@@ -48,7 +48,7 @@ namespace BarKitchenClient
 
                 //Subscribe remote server events
                 bkRepeater = new BarKitchenEventRepeater();
-                bkRepeater.BarKitchenEvent += new BarKitchenDelegate(addRequestListView);
+                bkRepeater.BarKitchenEvent += new BarKitchenDelegate(updateListView);
                 remoteServer.barKitchenEvent += new BarKitchenDelegate(bkRepeater.Repeater);
                 
             }
@@ -82,7 +82,7 @@ namespace BarKitchenClient
         {
 
             if (listView1.SelectedItems.Count < 1) return;
-
+            /*
             String requestNr = listView1.SelectedItems[0].Text;
             RequestLine rl = GetRequest(UInt16.Parse(requestNr));
 
@@ -106,6 +106,7 @@ namespace BarKitchenClient
             {
                 Console.WriteLine("[BarKitchenApp] Unable to change request state");
             }
+            */
         }
 
         private RequestLine GetRequest(ushort requestNr)
@@ -113,23 +114,7 @@ namespace BarKitchenClient
             return activeRequestList.FirstOrDefault(r => r.RequestNr == requestNr);
         }
 
-        private void updateRequestListView()
-        {
-
-            // TODO Get service type for function parameter
-            activeRequestList = remoteServer.GetActiveRequests(PreparationRoomID.Bar);
-
-            listView1.Items.Clear();
-
-            foreach (RequestLine r in activeRequestList)
-            {
-                ListViewItem lvItem = new ListViewItem(new string[] { r.RequestNr.ToString(), r.TableNr.ToString(),
-                    restaurantProducts[r.Prod].Name, r.Qtt.ToString(), r.RState.ToString(), restaurantProducts[r.Prod].PreparationSource.ToString() });
-                listView1.Items.Add(lvItem);
-            }
-        }
-
-        private void addRequestListView(PreparationRoomID pr, RequestLine rl)
+        private void updateListView(RequestState rs, RequestLine rl)
         {
             // TODO Get service type for function parameter
 

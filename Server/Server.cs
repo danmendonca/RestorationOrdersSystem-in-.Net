@@ -175,6 +175,7 @@ public class SingleServer : MarshalByRefObject, ISingleServer
     private void NotifyBarKitchen(RequestLine rl)
     {
         PreparationRoomID ps = products[rl.Prod].PreparationSource;
+        RequestState rs = rl.RState;
 
         if (barKitchenEvent != null)
         {
@@ -186,7 +187,7 @@ public class SingleServer : MarshalByRefObject, ISingleServer
                 {
                     try
                     {
-                        handler(ps, rl);
+                        handler(rs, rl);
                         Console.WriteLine("Invoking event handler");
                     }
                     catch (Exception)
