@@ -26,6 +26,12 @@ namespace BarKitchenClient
         // Delegate for adding row to listview
         private delegate ListViewItem AddListViewRowDelegate(ListViewItem lvItem);
 
+        // Delegate for updating listview row state field 
+        private delegate void UpdateRowStateDelegate(RequestLine rl);
+
+        // Delegate for removing listview row
+        private delegate void RemoveListViewRowDelegate(RequestLine rl);
+
         // List View Columns
         enum LvColumn { Request, Table, Product, Quantity, State, Service}
 
@@ -56,7 +62,7 @@ namespace BarKitchenClient
 
                 //Subscribe remote server events
                 BarKitchenRepeater = new BarKitchenEventRepeater();
-                BarKitchenRepeater.BarKitchenEvent += new BarKitchenDelegate(UpdateListView);
+                BarKitchenRepeater.BarKitchenEvent += new BarKitchenDelegate(RefreshListView);
                 RemoteServer.barKitchenEvent += new BarKitchenDelegate(BarKitchenRepeater.Repeater);
                 
             }
@@ -97,7 +103,7 @@ namespace BarKitchenClient
             RemoteServer.UpdateRequestLineState(UInt16.Parse(tableNr), UInt16.Parse(requestNr));
         }
 
-        private void UpdateListView(RequestLine rl)
+        private void RefreshListView(RequestLine rl)
         {
             // TODO Get service type for function parameter
 
@@ -106,11 +112,17 @@ namespace BarKitchenClient
             switch (rs)
             {
                 case RequestState.Waiting:
-                    AddRowListView(rl);
+                    ListViewItem lvi = CreateListViewItem(rl);
+                    AddListViewRowDelegate addRow = new AddListViewRowDelegate(listView1.Items.Add);
+                    BeginInvoke(addRow, new object[] { lvi });
                     break;
                 case RequestState.InProgress:
+                    UpdateRowStateDelegate updateState = new UpdateRowStateDelegate(UpdateRowAsync);
+                    BeginInvoke(updateState, new object[] { rl });
                     break;
                 case RequestState.Ready:
+                    RemoveListViewRowDelegate rmRow = new RemoveListViewRowDelegate(RemoveRowAsync);
+                    BeginInvoke(rmRow, new object[] { rl });
                     break;
                 case RequestState.Delivered:
                     break;
@@ -119,14 +131,45 @@ namespace BarKitchenClient
             }
         }
 
-        private void AddRowListView(RequestLine rl)
+        private void UpdateRowAsync(RequestLine rl)
         {
-            ListViewItem lvItem = new ListViewItem(new string[] { rl.RequestNr.ToString(), rl.TableNr.ToString(),
-                    RestaurantProducts[rl.Prod].Name, rl.Qtt.ToString(), rl.RState.ToString(), RestaurantProducts[rl.Prod].PreparationSource.ToString() });
-            AddListViewRowDelegate addRow = new AddListViewRowDelegate(listView1.Items.Add);
-            BeginInvoke(addRow, new object[] { lvItem });
+            ListViewItem lvi = GetListViewItem(rl);
+            if (lvi != null) lvi.SubItems[(int)LvColumn.State].Text = rl.RState.ToString(); 
+        }
+       
+        private void RemoveRowAsync(RequestLine rl)
+        {
+            ListViewItem lvi = GetListViewItem(rl);
+            if (lvi != null) listView1.Items.RemoveAt(lvi.Index);
         }
 
+        // Gets the ListViewItem that matches the RequestLine parameter
+        private ListViewItem GetListViewItem(RequestLine rl)
+        {
+            foreach (ListViewItem lvi in listView1.Items)
+            {
+                if (Convert.ToInt16(lvi.SubItems[(int)LvColumn.Request].Text) == rl.RequestNr)
+                {
+                    return lvi;
+                }
+            }
+            return null;
+        }
+
+        // Creates a ListViewItem with information from RequestLine parameter
+        private ListViewItem CreateListViewItem(RequestLine rl)
+        {
+            ListViewItem lvItem = new ListViewItem(new string[] {
+                rl.RequestNr.ToString(),
+                rl.TableNr.ToString(),
+                RestaurantProducts[rl.Prod].Name,
+                rl.Qtt.ToString(),
+                rl.RState.ToString(),
+                RestaurantProducts[rl.Prod].PreparationSource.ToString()
+            });
+
+            return lvItem;
+        } 
 
     }
 
