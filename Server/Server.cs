@@ -167,7 +167,7 @@ public class SingleServer : MarshalByRefObject, ISingleServer
 
             foreach (RequestLine r in temp)
             {
-                if (r.RState == RequestState.Waiting || r.RState == RequestState.InProgress)
+                if ((r.RState == RequestState.Waiting || r.RState == RequestState.InProgress) && (products[r.Prod].PreparationSource == service))
                 {
                     activeRequestList.Add(r);
                 }
