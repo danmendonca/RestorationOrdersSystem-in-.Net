@@ -23,6 +23,9 @@ namespace BarKitchenClient
         // BarKitchenEvent Repeater
         BarKitchenEventRepeater BarKitchenRepeater;
 
+        // Delegate for loading listview
+        private delegate void LoadListViewDelegate();
+
         // Delegate for adding row to listview
         private delegate ListViewItem AddListViewRowDelegate(ListViewItem lvItem);
 
@@ -56,25 +59,16 @@ namespace BarKitchenClient
                 // Get Restaurant products
                 RestaurantProducts = RemoteServer.GetProducts();
 
-                // TODO Get service type for function parameter
-                ServiceType = PreparationRoomID.Bar;
-                ActiveRequestList = RemoteServer.GetActiveRequests(ServiceType);
+                // Windows Forms initialization
+                InitializeComponent();
 
-                //Subscribe remote server events
-                BarKitchenRepeater = new BarKitchenEventRepeater();
-                BarKitchenRepeater.BarKitchenEvent += new BarKitchenDelegate(RefreshListView);
-                RemoteServer.barKitchenEvent += new BarKitchenDelegate(BarKitchenRepeater.Repeater);
-                
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                Console.WriteLine(e.GetType().FullName);
-                Console.WriteLine(e.Message);
-                Application.Exit();
+                Console.WriteLine(ex.GetType().FullName);
+                Console.WriteLine(ex.Message);
+                MessageBox.Show("Unable to connect remote server", "Remote Server", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-
-            // Windows Forms initialization
-            InitializeComponent();
         }
 
         public override object InitializeLifetimeService()
@@ -84,12 +78,7 @@ namespace BarKitchenClient
 
         private void BarKitchenWindow_Load(object sender, EventArgs e)
         {
-            foreach (RequestLine r in ActiveRequestList)
-            {
-                ListViewItem lvItem = new ListViewItem(new string[] { r.RequestNr.ToString(), r.TableNr.ToString(),
-                    RestaurantProducts[r.Prod].Name, r.Qtt.ToString(), r.RState.ToString(), RestaurantProducts[r.Prod].PreparationSource.ToString() });
-                listView1.Items.Add(lvItem);
-            }
+            
         }
 
         private void UpdateRequestState_Click(object sender, EventArgs e)
@@ -101,6 +90,36 @@ namespace BarKitchenClient
             String requestNr = listView1.SelectedItems[0].SubItems[(int)LvColumn.Request].Text;
            
             RemoteServer.UpdateRequestLineState(UInt16.Parse(tableNr), UInt16.Parse(requestNr));
+        }
+
+        private void startAppBtn_Click(object sender, EventArgs e)
+        {
+            startAppBtn.Enabled = false;
+            stComboBox.Enabled = false;
+
+            ServiceType = (PreparationRoomID)stComboBox.SelectedItem;
+        
+            ActiveRequestList = RemoteServer.GetActiveRequests(ServiceType);
+
+            //Subscribe remote server events
+            BarKitchenRepeater = new BarKitchenEventRepeater();
+            BarKitchenRepeater.BarKitchenEvent += new BarKitchenDelegate(RefreshListView);
+            RemoteServer.barKitchenEvent += new BarKitchenDelegate(BarKitchenRepeater.Repeater);
+            
+            LoadListViewDelegate llv = new LoadListViewDelegate(LoadListView);
+            BeginInvoke(llv, new object[] { });
+
+            updateStateBtn.Enabled = true;        
+        }
+
+        private void LoadListView()
+        {
+            foreach (RequestLine r in ActiveRequestList)
+            {
+                ListViewItem lvItem = new ListViewItem(new string[] { r.RequestNr.ToString(), r.TableNr.ToString(),
+                    RestaurantProducts[r.Prod].Name, r.Qtt.ToString(), r.RState.ToString(), RestaurantProducts[r.Prod].PreparationSource.ToString() });
+                listView1.Items.Add(lvItem);
+            }
         }
 
         private void RefreshListView(RequestLine rl)
@@ -169,7 +188,7 @@ namespace BarKitchenClient
             });
 
             return lvItem;
-        } 
+        }
 
     }
 
