@@ -63,6 +63,12 @@ public partial class RoomWindow : Form
         //subscribe proxy to registerServer events
         RequestReadyDelegate rrd = new RequestReadyDelegate(_roomProxy.RepeaterRReady);
         registerServer.requestReadyEvent += rrd;
+
+        
+        _requestLines = _requestLines.Concat(registerServer.GetActiveRequests(PreparationRoomID.Bar)).ToList();
+        _requestLines = _requestLines.Concat(registerServer.GetActiveRequests(PreparationRoomID.Kitchen)).ToList();
+        RefreshListViewRequests();
+
     }
     #endregion
 
