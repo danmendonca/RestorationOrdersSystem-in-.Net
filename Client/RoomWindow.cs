@@ -6,7 +6,7 @@ using System.Runtime.Remoting;
 using System.Threading;
 using System.Windows.Forms;
 
-public partial class Window : Form
+public partial class RoomWindow : Form
 {
     #region Statics
     private static String PTInProgress = "Preparação";
@@ -41,7 +41,7 @@ public partial class Window : Form
     }
 
 
-    public Window()
+    public RoomWindow()
     {
         InitializeComponent();
         guid = Guid.NewGuid();
@@ -67,8 +67,31 @@ public partial class Window : Form
     #endregion
 
 
+    #region updateGUI
+    public void ChangeTableListUI()
+    {
+        if (InvokeRequired)
+            BeginInvoke((MethodInvoker)delegate { ChangeTableListUI(); });
+        else
+        {
+            comboBoxTable.Items.Clear();
+            for (ushort i = 0; i < _nrTables; i++) comboBoxTable.Items.Add($"Mesa {i.ToString(),2}");
+        }
+    }
 
-    #region Update_listViewRequests
+
+    public void ChangeProductListUI()
+    {
+        if (InvokeRequired)
+            BeginInvoke((MethodInvoker)delegate { ChangeProductListUI(); });
+        else
+        {
+            comboBoxProduct.Items.Clear();
+            foreach (Product p in _ps) comboBoxProduct.Items.Add(p);
+        }
+    }
+
+
     private void RemoveReqFromLView(RequestLine rl)
     {
         if (InvokeRequired) BeginInvoke((MethodInvoker)delegate { RemoveReqFromLView(rl); });
@@ -187,30 +210,6 @@ public partial class Window : Form
     }
 
 
-    public void ChangeTableListUI()
-    {
-        if (InvokeRequired)
-            BeginInvoke((MethodInvoker)delegate { ChangeTableListUI(); });
-        else
-        {
-            comboBoxTable.Items.Clear();
-            for (ushort i = 0; i < _nrTables; i++) comboBoxTable.Items.Add($"Mesa {i.ToString(),2}");
-        }
-    }
-
-
-    public void ChangeProductListUI()
-    {
-        if (InvokeRequired)
-            BeginInvoke((MethodInvoker)delegate { ChangeProductListUI(); });
-        else
-        {
-            comboBoxProduct.Items.Clear();
-            foreach (Product p in _ps) comboBoxProduct.Items.Add(p);
-        }
-    }
-
-
     private void btnAskBill_Click(object sender, EventArgs e)
     {
         try
@@ -283,26 +282,4 @@ public partial class Window : Form
         }
     }
     #endregion
-}
-
-class RemoteNew
-{
-    private static Hashtable types = null;
-
-    private static void InitTypeTable()
-    {
-        types = new Hashtable();
-        foreach (WellKnownClientTypeEntry entry in RemotingConfiguration.GetRegisteredWellKnownClientTypes())
-            types.Add(entry.ObjectType, entry);
-    }
-
-    public static object New(Type type)
-    {
-        if (types == null)
-            InitTypeTable();
-        WellKnownClientTypeEntry entry = (WellKnownClientTypeEntry)types[type];
-        if (entry == null)
-            throw new RemotingException("Type not found!");
-        return RemotingServices.Connect(type, entry.ObjectUrl);
-    }
 }

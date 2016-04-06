@@ -10,14 +10,13 @@ public class RoomProxy : MarshalByRefObject, IRoomService
     {
         if (rREvent == null)
         {
-            Console.WriteLine("Repeater: No subscribers");
+            Console.WriteLine("RoomProxy: No subscribers");
             return;
         }
 
         Delegate[] invkList = rREvent.GetInvocationList();
         foreach (RequestReadyDelegate handler in invkList)
-        {
-            Console.WriteLine("I'm a new thread! Sending RequestReady messages");
+        {//TODO Will the event really have more than one subscriber?
             new Thread(() =>
             {
                 try
@@ -44,7 +43,6 @@ public class RoomProxy : MarshalByRefObject, IRoomService
         Delegate[] invkList = rDEvent.GetInvocationList();
         foreach (RequestReadyDelegate handler in invkList)
         {
-            Console.WriteLine("I'm a new thread! Sending RequestReady messages");
             new Thread(() =>
             {
                 try

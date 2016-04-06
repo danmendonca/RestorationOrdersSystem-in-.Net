@@ -39,11 +39,11 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Window.cs">
+    <Compile Include="RoomWindow.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Window.Designer.cs">
-      <DependentUpon>Window.cs</DependentUpon>
+    <Compile Include="RoomWindow.Designer.cs">
+      <DependentUpon>RoomWindow.cs</DependentUpon>
     </Compile>
     <Compile Include="RoomService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -56,8 +56,8 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="Window.resx">
-      <DependentUpon>Window.cs</DependentUpon>
+    <EmbeddedResource Include="RoomWindow.resx">
+      <DependentUpon>RoomWindow.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

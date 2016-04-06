@@ -8,7 +8,7 @@ static class Program
     static void Main()
     {
         RemotingConfiguration.Configure("Client.exe.config", false);
-        Window myWindow = new Window();
+        RoomWindow myWindow = new RoomWindow();
         Application.EnableVisualStyles();
         Application.Run(myWindow);
     }

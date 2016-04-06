@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.Remoting;
 using System.Threading;
-
+using System.Windows.Forms;
 using System.Linq;
 
-class Server
+static class Server
 {
+    [STAThread]
     static void Main(string[] args)
     {
         RemotingConfiguration.Configure("Server.exe.config", false);
@@ -18,17 +18,37 @@ class Server
 
 public class SingleServer : MarshalByRefObject, ISingleServer
 {
+    #region Statics
     private static ushort NR_OF_TABLES = 8;
-    Hashtable table = new Hashtable();
+    #endregion
+
+
+
+    #region attributes
+    private List<List<RequestLine>> bills = new List<List<RequestLine>>();
     private List<Product> products = new List<Product>();
+    #endregion
+
+
+
+    #region Properties
+    public List<Table> Tables { get; private set; } = new List<Table>();
     ushort NrTables { get; set; }
     ushort NrRequests { get; set; }
-    Table[] tables;
-    List<List<RequestLine>> bills = new List<List<RequestLine>>();
+    #endregion
 
+
+
+    #region events
     public event RequestReadyDelegate requestReadyEvent;
     public event BarKitchenDelegate barKitchenEvent;
-    
+    public event NewRequestDelegate EventNewRequest;
+    public event TablePaidDelegate TablePaymentEvent;
+    #endregion
+
+
+
+    #region classMethods
     public SingleServer()
     {
         CreateProducts();
@@ -39,8 +59,8 @@ public class SingleServer : MarshalByRefObject, ISingleServer
 
     private void CreateTables()
     {
-        tables = new Table[NrTables];
-        for (ushort i = 0; i < NrTables; i++) tables[(int)i] = new Table(i);
+        //tables = new Table[NrTables];
+        for (ushort i = 0; i < NrTables; i++) Tables.Add(new Table(i));
     }
 
     private void CreateProducts()
@@ -64,28 +84,77 @@ public class SingleServer : MarshalByRefObject, ISingleServer
         products.Add(p7);
     }
 
-    public void PayTable(ushort t)
+
+    private void TablePaymentNotifier(int table)
     {
-        if (t > NrTables || tables[t].TblState != TableStateID.Paying)
+        if (TablePaymentEvent == null)
             return;
 
-        bills.Add(tables[t].getRequests());
-        tables[t].changeState();
-        tables[t].ClearRequests();
+        Delegate[] invkList = TablePaymentEvent.GetInvocationList();
+        foreach (TablePaidDelegate handler in invkList)
+        {
+            //Console.WriteLine("I'm a new thread! Sending RequestReady messages");
+            new Thread(() =>
+            {
+                try
+                {
+                    handler(table);
+                }
+                catch (Exception)
+                {
+                    TablePaymentEvent -= handler;
+                }
+            }).Start();
+        }
     }
+    #endregion
 
-    void ISingleServer.MakeRequest(RequestLine newRL)
+
+
+    #region Interface Implementation
+    void ISingleServer.MakeRequest(RequestLine oldRl)
     {
-        RequestLine rl = new RequestLine(newRL);
-        Console.WriteLine($"Added new request to table {rl.TableNr} for {rl.Qtt} of {products[rl.Prod]}");
-        if (rl.TableNr > NrTables || tables[rl.TableNr].TblState != TableStateID.Available)
+        RequestLine rl = new RequestLine(oldRl);
+        //Console.WriteLine($"Added new request to table {rl.TableNr} for {rl.Qtt} of {products[rl.Prod]}");
+        if (rl.TableNr > NrTables || Tables.ElementAt(rl.TableNr).TblState != TableStateID.Available)
             return;
         rl.RequestNr = NrRequests++;
-        tables[rl.TableNr].insertNewRequest(rl);
-
+        Tables.ElementAt(rl.TableNr).insertNewRequest(rl);
+        /*
+        Console.WriteLine($"Current List of requests:");
+        foreach (var requestLine in Tables.ElementAt(rl.TableNr).getRequests())
+        {
+            Console.WriteLine($"{products.ElementAt((int)requestLine.Prod).Name, 10} {requestLine.Qtt,2}");
+        }
+        Console.WriteLine($"End of List");
+        */
         ChangeRequestState(rl);
+        NotifyRegisterGUI(rl);
         NotifyBarKitchen(rl);
+    }
 
+
+    public void NotifyRegisterGUI(RequestLine rl)
+    {
+        if (EventNewRequest == null)
+            return;
+
+        Delegate[] invkList = EventNewRequest.GetInvocationList();
+        foreach (NewRequestDelegate handler in invkList)
+        {
+            //Console.WriteLine("I'm a new thread! Sending RequestReady messages");
+            new Thread(() =>
+            {
+                try
+                {
+                    handler(rl);
+                }
+                catch (Exception)
+                {
+                    EventNewRequest -= handler;
+                }
+            }).Start();
+        }
     }
 
     public void ChangeRequestState(RequestLine rl)
@@ -99,7 +168,7 @@ public class SingleServer : MarshalByRefObject, ISingleServer
         Delegate[] invkList = requestReadyEvent.GetInvocationList();
         foreach (RequestReadyDelegate handler in invkList)
         {
-            Console.WriteLine("I'm a new thread! Sending RequestReady messages");
+            //Console.WriteLine("I'm a new thread! Sending RequestReady messages");
             new Thread(() =>
             {
                 try
@@ -114,9 +183,20 @@ public class SingleServer : MarshalByRefObject, ISingleServer
         }
     }
 
-    ushort ISingleServer.GetNrTables()
+
+    public ushort GetNrTables()
     {
         return NrTables;
+    }
+
+    List<Table> ISingleServer.GetTables()
+    {
+        return Tables;
+    }
+
+    List<RequestLine> ISingleServer.GetTableRLs(int selectedIndex)
+    {
+        return Tables.ElementAt(selectedIndex).getRequests();
     }
 
     List<Product> ISingleServer.GetProducts()
@@ -124,23 +204,37 @@ public class SingleServer : MarshalByRefObject, ISingleServer
         return products;
     }
 
+
     bool ISingleServer.RequestBill(ushort tableNr)
     {
-        if (tableNr > NrTables || tables[tableNr].TblState != TableStateID.Available)
+        if (tableNr > NrTables || Tables.ElementAt(tableNr).TblState != TableStateID.Available)
             return false;
 
-        tables[tableNr].changeState();
-        bills.Add(tables[tableNr].getRequests());
+        Tables.ElementAt(tableNr).changeState();
+        bills.Add(Tables.ElementAt(tableNr).getRequests());
 
         return true;
     }
 
+    public void SetTablePaid(int t)
+    {
+        Console.WriteLine($"receiving? money for table: {t}");
+
+        if (t > NrTables || Tables.ElementAt(t).TblState != TableStateID.Paying)
+            return;
+
+        bills.Add(Tables.ElementAt(t).getRequests());
+        Tables.ElementAt(t).changeState();
+        Tables.ElementAt(t).ClearRequests();
+        TablePaymentNotifier(t);
+    }
+
     void ISingleServer.SetRequestDelivered(int tblNr, ushort rNumber)
     {
-        foreach (RequestLine reqL in tables[tblNr].getRequests())
+        foreach (RequestLine reqL in Tables.ElementAt(tblNr).getRequests())
         {
             if (reqL.RequestNr != rNumber) continue;
-            Console.WriteLine($"Request nr: {reqL.RequestNr} delivered");
+            //Console.WriteLine($"Request nr: {reqL.RequestNr} delivered");
             reqL.RState = RequestState.Delivered;
             ChangeRequestState(reqL);
             break;
@@ -148,12 +242,15 @@ public class SingleServer : MarshalByRefObject, ISingleServer
 
 
     }
+    #endregion
+
+
 
     #region Bar Kitchen Methods Definition
 
     private RequestLine GetRequest(int tableNr, int requestNr)
     {
-        return tables[tableNr].getRequests().FirstOrDefault(r => r.RequestNr == requestNr);
+        return Tables.ElementAt(tableNr).getRequests().FirstOrDefault(r => r.RequestNr == requestNr);
     }
 
     // From all table requests returns requests with waiting or in progress status
@@ -161,7 +258,7 @@ public class SingleServer : MarshalByRefObject, ISingleServer
     {
         List<RequestLine> activeRequestList = new List<RequestLine>();
 
-        foreach (Table t in tables)
+        foreach (Table t in Tables)
         {
             List<RequestLine> temp = t.getRequests();
 
@@ -182,7 +279,7 @@ public class SingleServer : MarshalByRefObject, ISingleServer
     {
         RequestLine rl = GetRequest(tableNr, requestNr);
 
-        if(rl != null)
+        if (rl != null)
         {
             rl.changeState();
             NotifyBarKitchen(rl);
@@ -192,7 +289,7 @@ public class SingleServer : MarshalByRefObject, ISingleServer
         }
         else
         {
-            Console.WriteLine("[Server] Unable to change request line state");
+            //Console.WriteLine("[Server] Unable to change request line state");
         }
     }
 
@@ -209,18 +306,27 @@ public class SingleServer : MarshalByRefObject, ISingleServer
                     try
                     {
                         handler(rl);
-                        Console.WriteLine("Invoking event handler");
+                        //Console.WriteLine("Invoking event handler");
                     }
                     catch (Exception)
                     {
                         barKitchenEvent -= handler;
-                        Console.WriteLine("Exception: Removed an event handler");
+                        //Console.WriteLine("Exception: Removed an event handler");
                     }
                 }).Start();
-            } 
+            }
         }
     }
 
+    #endregion
+
+
+
+    #region Overrides
+    public override object InitializeLifetimeService()
+    {
+        return null;
+    }
     #endregion
 
 }

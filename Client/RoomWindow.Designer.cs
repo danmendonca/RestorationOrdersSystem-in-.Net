@@ -1,4 +1,4 @@
-﻿partial class Window {
+﻿partial class RoomWindow {
   /// <summary>
   /// Required designer variable.
   /// </summary>

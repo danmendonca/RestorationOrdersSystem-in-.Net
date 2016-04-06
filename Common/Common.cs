@@ -152,7 +152,7 @@ public class RequestLine : MarshalByRefObject
                 return false;
         }
     }
-    }
+}
 
 [Serializable]
 public class Table
@@ -235,6 +235,7 @@ public delegate void RequestReadyDelegate(RequestLine rl);
 public delegate void RequestDeliveredDelegate(RequestLine rl);
 public delegate void NrTablesDelegate(ushort n);
 public delegate void ProductListDelegate(List<Product> lp);
+public delegate void TablePaidDelegate(int tableNr);
 #endregion
 
 
@@ -263,23 +264,37 @@ public class BarKitchenEventRepeater : MarshalByRefObject
 
 
 
+#region RegisterGUI Delegates
+public delegate void NewRequestDelegate(RequestLine rl);
+#endregion
+
+
+
 #region Interfaces
 public interface ISingleServer
 {
     #region events
     event RequestReadyDelegate requestReadyEvent;
+    event NewRequestDelegate EventNewRequest;
+    event TablePaidDelegate TablePaymentEvent;
     event BarKitchenDelegate barKitchenEvent;
     #endregion
 
-    bool RequestBill(ushort tableNr);
-    List<RequestLine> GetActiveRequests(PreparationRoomID service);
-    List<Product> GetProducts();
-    ushort GetNrTables();
-    void ChangeRequestState(RequestLine rl);
-    void MakeRequest(RequestLine rl);
-    void SetRequestDelivered(int tblNr, ushort rNumber);
-    void UpdateRequestLineState(int tableNr, int requestNr);
 
+
+    #region InterfaceMethods
+    void ChangeRequestState(RequestLine rl);
+    List<RequestLine> GetActiveRequests(PreparationRoomID service);
+    ushort GetNrTables();
+    List<Product> GetProducts();
+    List<Table> GetTables();
+    List<RequestLine> GetTableRLs(int selectedIndex);
+    void MakeRequest(RequestLine rl);
+    bool RequestBill(ushort tableNr);
+    void SetRequestDelivered(int tblNr, ushort rNumber);
+    void SetTablePaid(int tblNr);
+    void UpdateRequestLineState(int tableNr, int requestNr);
+    #endregion
 }
 
 

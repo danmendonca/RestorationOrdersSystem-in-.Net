@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RoomService", "Client\RoomS
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BarKitchenClient", "BarKitchenClient\BarKitchenClient.csproj", "{67451484-C32B-4404-AB95-547E1B07FB3C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RegisterGUI", "RegisterGUI\RegisterGUI.csproj", "{ACB44643-BC57-4913-AC03-654720A14981}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -69,6 +71,18 @@ Global
 		{67451484-C32B-4404-AB95-547E1B07FB3C}.Release|x64.Build.0 = Release|Any CPU
 		{67451484-C32B-4404-AB95-547E1B07FB3C}.Release|x86.ActiveCfg = Release|Any CPU
 		{67451484-C32B-4404-AB95-547E1B07FB3C}.Release|x86.Build.0 = Release|Any CPU
+		{ACB44643-BC57-4913-AC03-654720A14981}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ACB44643-BC57-4913-AC03-654720A14981}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ACB44643-BC57-4913-AC03-654720A14981}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{ACB44643-BC57-4913-AC03-654720A14981}.Debug|x64.Build.0 = Debug|Any CPU
+		{ACB44643-BC57-4913-AC03-654720A14981}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{ACB44643-BC57-4913-AC03-654720A14981}.Debug|x86.Build.0 = Debug|Any CPU
+		{ACB44643-BC57-4913-AC03-654720A14981}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ACB44643-BC57-4913-AC03-654720A14981}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ACB44643-BC57-4913-AC03-654720A14981}.Release|x64.ActiveCfg = Release|Any CPU
+		{ACB44643-BC57-4913-AC03-654720A14981}.Release|x64.Build.0 = Release|Any CPU
+		{ACB44643-BC57-4913-AC03-654720A14981}.Release|x86.ActiveCfg = Release|Any CPU
+		{ACB44643-BC57-4913-AC03-654720A14981}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
