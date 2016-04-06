@@ -125,6 +125,7 @@ namespace BarKitchenClient
         private void RefreshListView(RequestLine rl)
         {
             // TODO Get service type for function parameter
+            if (RestaurantProducts[rl.Prod].PreparationSource != ServiceType) return;
 
             RequestState rs = rl.RState;
 
