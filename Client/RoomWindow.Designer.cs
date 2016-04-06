@@ -121,7 +121,7 @@
             // product
             // 
             this.product.Text = "Producto";
-            this.product.Width = 305;
+            this.product.Width = 289;
             // 
             // quantity
             // 
@@ -131,7 +131,7 @@
             // state
             // 
             this.state.Text = "Estado";
-            this.state.Width = 55;
+            this.state.Width = 71;
             // 
             // btnReqDelivered
             // 
@@ -143,7 +143,7 @@
             this.btnReqDelivered.UseVisualStyleBackColor = true;
             this.btnReqDelivered.Click += new System.EventHandler(this.btnReqDelivered_Click);
             // 
-            // Window
+            // RoomWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -157,7 +157,7 @@
             this.Controls.Add(this.btnMkReq);
             this.Controls.Add(this.btnAskBill);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
-            this.Name = "Window";
+            this.Name = "RoomWindow";
             this.Text = "Client";
             ((System.ComponentModel.ISupportInitialize)(this.spinnerQuantity)).EndInit();
             this.ResumeLayout(false);

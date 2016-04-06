@@ -107,23 +107,25 @@ public partial class RoomWindow : Form
     }
 
 
-    private void ChangeReqStateInLView(RequestLine rl)
-    {
-        if (InvokeRequired) BeginInvoke((MethodInvoker)delegate { ChangeReqStateInLView(rl); });
-        else
-        {
-            for (int i = 0; i < listViewRequests.Items.Count; i++)
-            {
-                ushort reqNr = Convert.ToUInt16(listViewRequests.Items[i].SubItems[LISTVIEW_REQ_NR_INDEX].Text);
-                if (rl.RequestNr != reqNr) continue;
+    //private void ChangeReqStateInLView(RequestLine rl)
+    //{
+    //    if (InvokeRequired) BeginInvoke((MethodInvoker)delegate { ChangeReqStateInLView(rl); });
+    //    else
+    //    {
+    //        for (int i = 0; i < listViewRequests.Items.Count; i++)
+    //        {
+    //            ushort reqNr = Convert.ToUInt16(listViewRequests.Items[i].SubItems[LISTVIEW_REQ_NR_INDEX].Text);
+    //            if (rl.RequestNr != reqNr) continue;
+    //            string state = StateToString(rl);
+    //            //Console.WriteLine($"adding requestLine {i,2} state {state}");
+    //            listViewRequests.Items[i].SubItems[LISTVIEW_STATE_INDEX].Text = state;
+    //            break;
+    //        }
+    //    }
+    //}
 
-                listViewRequests.Items[i].SubItems[LISTVIEW_STATE_INDEX].Text = StateToString(rl);
-                break;
-            }
-        }
-    }
-
-
+        /*
+        */
     private void AddRequest(RequestLine rl)
     {
         _requestLines.Add(rl);
@@ -164,6 +166,7 @@ public partial class RoomWindow : Form
             lvi.SubItems.Add(_ps[requestLine.Prod].ToString());
             lvi.SubItems.Add(requestLine.Qtt.ToString());
             string state = StateToString(requestLine);
+            lvi.SubItems.Add(state);
             listViewRequests.Items.Add(lvi);
             Console.WriteLine($"added to reqView: {requestLine.ToString()}");
         }
