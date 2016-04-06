@@ -268,6 +268,10 @@ public class BarKitchenEventRepeater : MarshalByRefObject
 public delegate void NewRequestDelegate(RequestLine rl);
 #endregion
 
+#region Printer Delegates
+public delegate void InvoiceDelegate(List<RequestLine> tableRequests);
+#endregion
+
 
 
 #region Interfaces
@@ -278,12 +282,13 @@ public interface ISingleServer
     event NewRequestDelegate EventNewRequest;
     event TablePaidDelegate TablePaymentEvent;
     event BarKitchenDelegate barKitchenEvent;
+    event InvoiceDelegate InvoiceEvent;
     #endregion
 
 
 
     #region InterfaceMethods
-    void ChangeRequestState(RequestLine rl);
+    void RequestNotifier(RequestLine rl);
     List<RequestLine> GetActiveRequests(PreparationRoomID service);
     ushort GetNrTables();
     List<Product> GetProducts();
