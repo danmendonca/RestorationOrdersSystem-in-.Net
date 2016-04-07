@@ -205,6 +205,20 @@ public class SingleServer : MarshalByRefObject, ISingleServer
         return NrTables;
     }
 
+    public List<RequestLine> GetNonDeliveredRequests()
+    {
+        List<RequestLine> nonDliveredRequests = new List<RequestLine>();
+        foreach (var item in Tables)
+        {
+            foreach (var rl in item.getRequests())
+            {
+                if (rl.RState != RequestState.Delivered)
+                    nonDliveredRequests.Add(rl);
+            }
+        }
+        return nonDliveredRequests;
+    }
+
     List<Table> ISingleServer.GetTables()
     {
         return Tables;

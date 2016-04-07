@@ -290,6 +290,7 @@ public interface ISingleServer
     #region InterfaceMethods
     void RequestNotifier(RequestLine rl);
     List<RequestLine> GetActiveRequests(PreparationRoomID service);
+    List<RequestLine> GetNonDeliveredRequests();
     ushort GetNrTables();
     List<Product> GetProducts();
     List<Table> GetTables();

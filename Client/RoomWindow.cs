@@ -64,9 +64,7 @@ public partial class RoomWindow : Form
         RequestReadyDelegate rrd = new RequestReadyDelegate(_roomProxy.RepeaterRReady);
         registerServer.requestReadyEvent += rrd;
 
-        
-        _requestLines = _requestLines.Concat(registerServer.GetActiveRequests(PreparationRoomID.Bar)).ToList();
-        _requestLines = _requestLines.Concat(registerServer.GetActiveRequests(PreparationRoomID.Kitchen)).ToList();
+        _requestLines = _requestLines.Concat(registerServer.GetNonDeliveredRequests()).ToList();
         RefreshListViewRequests();
 
     }
