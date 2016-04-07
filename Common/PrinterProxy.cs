@@ -18,7 +18,6 @@ public class PrinterProxy : MarshalByRefObject
         Delegate[] invkList = InvoiceEvent.GetInvocationList();
         foreach (InvoiceDelegate handler in invkList)
         {
-            //Console.WriteLine("I'm a new thread! Sending RequestReady messages");
             new Thread(() =>
             {
                 try

@@ -40,10 +40,9 @@ public class SingleServer : MarshalByRefObject, ISingleServer
 
 
     #region events
-    public event RequestReadyDelegate requestReadyEvent;
+    public event RequestDelegate RequestEvent;
     public event BarKitchenDelegate barKitchenEvent;
-    public event NewRequestDelegate EventNewRequest;
-    public event TablePaidDelegate TablePaymentEvent;
+    public event TablePaidDelegate TablePaidEvent;
     public event InvoiceDelegate InvoiceEvent;
     #endregion
 
@@ -88,13 +87,12 @@ public class SingleServer : MarshalByRefObject, ISingleServer
 
     private void TablePaymentNotifier(int table)
     {
-        if (TablePaymentEvent == null)
+        if (TablePaidEvent == null)
             return;
 
-        Delegate[] invkList = TablePaymentEvent.GetInvocationList();
+        Delegate[] invkList = TablePaidEvent.GetInvocationList();
         foreach (TablePaidDelegate handler in invkList)
         {
-            //Console.WriteLine("I'm a new thread! Sending RequestReady messages");
             new Thread(() =>
             {
                 try
@@ -103,7 +101,7 @@ public class SingleServer : MarshalByRefObject, ISingleServer
                 }
                 catch (Exception)
                 {
-                    TablePaymentEvent -= handler;
+                    TablePaidEvent -= handler;
                 }
             }).Start();
         }
@@ -117,7 +115,6 @@ public class SingleServer : MarshalByRefObject, ISingleServer
         Delegate[] invkList = InvoiceEvent.GetInvocationList();
         foreach (InvoiceDelegate handler in invkList)
         {
-            //Console.WriteLine("I'm a new thread! Sending RequestReady messages");
             new Thread(() =>
             {
                 try
@@ -132,41 +129,17 @@ public class SingleServer : MarshalByRefObject, ISingleServer
         }
     }
 
-    public void RegisterGUINotifier(RequestLine rl)
-    {
-        if (EventNewRequest == null)
-            return;
-
-        Delegate[] invkList = EventNewRequest.GetInvocationList();
-        foreach (NewRequestDelegate handler in invkList)
-        {
-            //Console.WriteLine("I'm a new thread! Sending RequestReady messages");
-            new Thread(() =>
-            {
-                try
-                {
-                    handler(rl);
-                }
-                catch (Exception)
-                {
-                    EventNewRequest -= handler;
-                }
-            }).Start();
-        }
-    }
 
     public void RequestNotifier(RequestLine rl)
     {
-        if (requestReadyEvent == null)
+        if (RequestEvent == null)
         {
-            Console.WriteLine("No subscribers ");
             return;
         }
 
-        Delegate[] invkList = requestReadyEvent.GetInvocationList();
-        foreach (RequestReadyDelegate handler in invkList)
+        Delegate[] invkList = RequestEvent.GetInvocationList();
+        foreach (RequestDelegate handler in invkList)
         {
-            //Console.WriteLine("I'm a new thread! Sending RequestReady messages");
             new Thread(() =>
             {
                 try
@@ -175,7 +148,7 @@ public class SingleServer : MarshalByRefObject, ISingleServer
                 }
                 catch (Exception)
                 {
-                    requestReadyEvent -= handler;
+                    RequestEvent -= handler;
                 }
             }).Start();
         }
@@ -196,7 +169,6 @@ public class SingleServer : MarshalByRefObject, ISingleServer
         Tables.ElementAt(rl.TableNr).insertNewRequest(rl);
 
         RequestNotifier(rl);
-        RegisterGUINotifier(rl);
         NotifyBarKitchen(rl);
     }
 
@@ -248,8 +220,6 @@ public class SingleServer : MarshalByRefObject, ISingleServer
 
     public void SetTablePaid(int t)
     {
-        Console.WriteLine($"receiving? money for table: {t}");
-
         if (t > NrTables || Tables.ElementAt(t).TblState != TableStateID.Paying)
             return;
 
@@ -265,7 +235,7 @@ public class SingleServer : MarshalByRefObject, ISingleServer
         foreach (RequestLine reqL in Tables.ElementAt(tblNr).getRequests())
         {
             if (reqL.RequestNr != rNumber) continue;
-            //Console.WriteLine($"Request nr: {reqL.RequestNr} delivered");
+
             reqL.RState = RequestState.Delivered;
             RequestNotifier(reqL);
             break;
@@ -320,7 +290,6 @@ public class SingleServer : MarshalByRefObject, ISingleServer
         }
         else
         {
-            //Console.WriteLine("[Server] Unable to change request line state");
         }
     }
 
@@ -337,12 +306,10 @@ public class SingleServer : MarshalByRefObject, ISingleServer
                     try
                     {
                         handler(rl);
-                        //Console.WriteLine("Invoking event handler");
                     }
                     catch (Exception)
                     {
                         barKitchenEvent -= handler;
-                        //Console.WriteLine("Exception: Removed an event handler");
                     }
                 }).Start();
             }

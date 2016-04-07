@@ -48,8 +48,8 @@ public partial class RoomWindow : Form
         _requestLines = new List<RequestLine>();
         //create proxy to registerServer and subscribe its events
         _roomProxy = new RoomProxy();
-        _roomProxy.rREvent += new RequestReadyDelegate(RoomProxy_rREvent);
-        _roomProxy.rDEvent += new RequestDeliveredDelegate(RoomProxy_rDEvent);
+        _roomProxy.rREvent += new RequestDelegate(RoomProxy_rREvent);
+        //_roomProxy.rDEvent += new RequestDeliveredDelegate(RoomProxy_rDEvent);
 
         //reference to registerServer
         registerServer = (ISingleServer)RemoteNew.New(typeof(ISingleServer));
@@ -61,8 +61,8 @@ public partial class RoomWindow : Form
         ChangeTableListUI();
 
         //subscribe proxy to registerServer events
-        RequestReadyDelegate rrd = new RequestReadyDelegate(_roomProxy.RepeaterRReady);
-        registerServer.requestReadyEvent += rrd;
+        RequestDelegate rrd = new RequestDelegate(_roomProxy.RepeaterRReady);
+        registerServer.RequestEvent += rrd;
 
         _requestLines = _requestLines.Concat(registerServer.GetNonDeliveredRequests()).ToList();
         RefreshListViewRequests();
@@ -110,26 +110,6 @@ public partial class RoomWindow : Form
         }
     }
 
-
-    //private void ChangeReqStateInLView(RequestLine rl)
-    //{
-    //    if (InvokeRequired) BeginInvoke((MethodInvoker)delegate { ChangeReqStateInLView(rl); });
-    //    else
-    //    {
-    //        for (int i = 0; i < listViewRequests.Items.Count; i++)
-    //        {
-    //            ushort reqNr = Convert.ToUInt16(listViewRequests.Items[i].SubItems[LISTVIEW_REQ_NR_INDEX].Text);
-    //            if (rl.RequestNr != reqNr) continue;
-    //            string state = StateToString(rl);
-    //            //Console.WriteLine($"adding requestLine {i,2} state {state}");
-    //            listViewRequests.Items[i].SubItems[LISTVIEW_STATE_INDEX].Text = state;
-    //            break;
-    //        }
-    //    }
-    //}
-
-        /*
-        */
     private void AddRequest(RequestLine rl)
     {
         _requestLines.Add(rl);
@@ -172,7 +152,6 @@ public partial class RoomWindow : Form
             string state = StateToString(requestLine);
             lvi.SubItems.Add(state);
             listViewRequests.Items.Add(lvi);
-            Console.WriteLine($"added to reqView: {requestLine.ToString()}");
         }
     }
     #endregion
@@ -235,35 +214,20 @@ public partial class RoomWindow : Form
     #region Handlers
 
 
-
-    //TODO not needed?
-    private void RoomProxy_rDEvent(RequestLine rl)
-    {
-        throw new NotImplementedException();
-    }
-
     private void RoomProxy_rREvent(RequestLine rl)
     {
 
         switch (rl.RState)
         {
             case RequestState.Waiting:
-                Console.WriteLine($"Adding new RequestLine.");
                 AddRequest(rl);
-                //TODO ADD ONE LINE TO THE VIEW OR REFRESH THE WHOLE VIEW?
                 RefreshListViewRequests();
                 break;
             case RequestState.Delivered:
-                Console.WriteLine($"Removing new RequestLine.");
                 RemoveRequest(rl);
-                //TODO REMOVE ONE LINE OF THE VIEW OR REFRESH THE WHOLE VIEW?
                 RefreshListViewRequests();
-                //RemoveReqFromLView(requestLine);
                 break;
             default:
-                Console.WriteLine($"Updating new RequestLine.");
-                //TODO UPDATE ONE LINE OF THE VIEW OR REFRESH THE WHOLE VIEW?
-                //ChangeReqStateInLView(requestLine);
                 RefreshListViewRequests();
                 break;
         }

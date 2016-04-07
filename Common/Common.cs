@@ -231,8 +231,8 @@ public class Table
 
 
 #region Room Service Delegates
-public delegate void RequestReadyDelegate(RequestLine rl);
-public delegate void RequestDeliveredDelegate(RequestLine rl);
+public delegate void RequestDelegate(RequestLine rl);
+//public delegate void RequestDeliveredDelegate(RequestLine rl);
 public delegate void NrTablesDelegate(ushort n);
 public delegate void ProductListDelegate(List<Product> lp);
 public delegate void TablePaidDelegate(int tableNr);
@@ -264,10 +264,6 @@ public class BarKitchenEventRepeater : MarshalByRefObject
 
 
 
-#region RegisterGUI Delegates
-public delegate void NewRequestDelegate(RequestLine rl);
-#endregion
-
 #region Printer Delegates
 public delegate void InvoiceDelegate(List<RequestLine> tableRequests);
 #endregion
@@ -278,9 +274,8 @@ public delegate void InvoiceDelegate(List<RequestLine> tableRequests);
 public interface ISingleServer
 {
     #region events
-    event RequestReadyDelegate requestReadyEvent;
-    event NewRequestDelegate EventNewRequest;
-    event TablePaidDelegate TablePaymentEvent;
+    event RequestDelegate RequestEvent;
+    event TablePaidDelegate TablePaidEvent;
     event BarKitchenDelegate barKitchenEvent;
     event InvoiceDelegate InvoiceEvent;
     #endregion

@@ -40,18 +40,21 @@ namespace RegisterGUI
         {
             InitializeComponent();
 
-            //subscribe proxy event
-            rgProxy = new RegisterGuiProxy();
-            NewRequestDelegate selfNRD = new NewRequestDelegate(NewRequestHandler);
-            rgProxy.EventNewRequest += selfNRD;
-            rgProxy.TablePaidEvent += new TablePaidDelegate(TablePaidHandler);
-
             //subscribe proxy to server
             registerServer = (ISingleServer)RemoteNew.New(typeof(ISingleServer));
-            NewRequestDelegate proxyNRD = new NewRequestDelegate(rgProxy.NewRequestHandler);
-            registerServer.EventNewRequest += proxyNRD;
+
+            //subscribe proxy event
+            rgProxy = new RegisterGuiProxy();
+
+            RequestDelegate selfRD = new RequestDelegate(RequestHandler);
+            rgProxy.RequestEvent += selfRD;
+            TablePaidDelegate selfTPD = new TablePaidDelegate(TablePaidHandler);
+            rgProxy.TablePaidEvent += selfTPD;
+
             TablePaidDelegate proxyTPD = new TablePaidDelegate(rgProxy.TablePaidNotifier);
-            registerServer.TablePaymentEvent += proxyTPD;
+            registerServer.TablePaidEvent += proxyTPD;
+            RequestDelegate proxyRD = new RequestDelegate(rgProxy.RequestsUpdateNotifier);
+            registerServer.RequestEvent += proxyRD;
 
             NrOfTables = registerServer.GetNrTables();
             Products = registerServer.GetProducts();
@@ -124,9 +127,8 @@ namespace RegisterGUI
             if (rls != null) ChangeTableRequestsView(rls);
         }
 
-        private void NewRequestHandler(RequestLine rl)
+        private void RequestHandler(RequestLine rl)
         {
-
             if (rl.TableNr != comboBoxTable.SelectedIndex) return;
 
             List<RequestLine> rls = GetTableRequests();

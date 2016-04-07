@@ -8,32 +8,8 @@ using System.Threading.Tasks;
 
 public class RegisterGuiProxy : MarshalByRefObject
 {
-    public event NewRequestDelegate EventNewRequest;
     public event TablePaidDelegate TablePaidEvent;
-
-
-    public void NewRequestHandler(RequestLine rl)
-    {
-        if (EventNewRequest == null)
-            return;
-
-        Delegate[] invkList = TablePaidEvent.GetInvocationList();
-        foreach (NewRequestDelegate handler in invkList)
-        {
-            //Console.WriteLine("I'm a new thread! Sending RequestReady messages");
-            new Thread(() =>
-            {
-                try
-                {
-                    handler(rl);
-                }
-                catch (Exception)
-                {
-                    EventNewRequest -= handler;
-                }
-            }).Start();
-        }
-    }
+    public event RequestDelegate RequestEvent;
 
     public void TablePaidNotifier(int table)
     {
@@ -43,7 +19,6 @@ public class RegisterGuiProxy : MarshalByRefObject
         Delegate[] invkList = TablePaidEvent.GetInvocationList();
         foreach (TablePaidDelegate handler in invkList)
         {
-            //Console.WriteLine("I'm a new thread! Sending RequestReady messages");
             new Thread(() =>
             {
                 try
@@ -53,6 +28,28 @@ public class RegisterGuiProxy : MarshalByRefObject
                 catch (Exception)
                 {
                     TablePaidEvent -= handler;
+                }
+            }).Start();
+        }
+    }
+
+    public void RequestsUpdateNotifier(RequestLine rl)
+    {
+        if (RequestEvent == null)
+            return;
+
+        Delegate[] invkList = RequestEvent.GetInvocationList();
+        foreach (RequestDelegate handler in invkList)
+        {
+            new Thread(() =>
+            {
+                try
+                {
+                    handler(rl);
+                }
+                catch (Exception)
+                {
+                    RequestEvent -= handler;
                 }
             }).Start();
         }
