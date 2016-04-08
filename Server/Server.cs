@@ -220,12 +220,11 @@ public class SingleServer : MarshalByRefObject, ISingleServer
 
     public void SetTablePaid(int t)
     {
-        if (t > NrTables || Tables.ElementAt(t).TblState != TableStateID.Paying)
-            return;
-
         bills.Add(Tables.ElementAt(t).getRequests());
         Tables.ElementAt(t).changeState();
+
         TableInvoiceNotifier(Tables.ElementAt(t).getRequests());
+
         Tables.ElementAt(t).ClearRequests();
         TablePaymentNotifier(t);
     }
