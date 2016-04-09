@@ -34,7 +34,8 @@ public class Product
 
     public override string ToString()
     {
-        return $"{Name} {Price,3}€";
+        String formated = String.Format("{0, -15} {1,-5}$", Name, Price.ToString("0.00"));
+        return formated;
     }
 }
 

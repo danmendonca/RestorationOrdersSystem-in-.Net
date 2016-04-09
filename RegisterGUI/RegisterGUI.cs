@@ -86,7 +86,7 @@ namespace RegisterGUI
             else
             {
                 comboBoxTable.Items.Clear();
-                for (ushort i = 0; i < NrOfTables; i++) comboBoxTable.Items.Add($"Mesa {i.ToString(),2}");
+                for (ushort i = 0; i < NrOfTables; i++) comboBoxTable.Items.Add($"Table {i.ToString(),2}");
             }
         }
 

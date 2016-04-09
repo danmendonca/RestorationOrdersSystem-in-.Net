@@ -40,7 +40,7 @@
             // comboBoxTable
             // 
             this.comboBoxTable.FormattingEnabled = true;
-            this.comboBoxTable.Location = new System.Drawing.Point(215, 423);
+            this.comboBoxTable.Location = new System.Drawing.Point(197, 423);
             this.comboBoxTable.Name = "comboBoxTable";
             this.comboBoxTable.Size = new System.Drawing.Size(121, 21);
             this.comboBoxTable.TabIndex = 0;
@@ -48,11 +48,11 @@
             // 
             // btnSetTablePaid
             // 
-            this.btnSetTablePaid.Location = new System.Drawing.Point(361, 423);
+            this.btnSetTablePaid.Location = new System.Drawing.Point(324, 423);
             this.btnSetTablePaid.Name = "btnSetTablePaid";
             this.btnSetTablePaid.Size = new System.Drawing.Size(75, 23);
             this.btnSetTablePaid.TabIndex = 1;
-            this.btnSetTablePaid.Text = "Receber";
+            this.btnSetTablePaid.Text = "Pay Table";
             this.btnSetTablePaid.UseVisualStyleBackColor = true;
             this.btnSetTablePaid.Click += new System.EventHandler(this.btnSetTablePaid_Click);
             // 
@@ -66,44 +66,44 @@
             this.listViewTableReqs.FullRowSelect = true;
             this.listViewTableReqs.GridLines = true;
             this.listViewTableReqs.HideSelection = false;
-            this.listViewTableReqs.Location = new System.Drawing.Point(78, 12);
+            this.listViewTableReqs.Location = new System.Drawing.Point(12, 12);
             this.listViewTableReqs.MultiSelect = false;
             this.listViewTableReqs.Name = "listViewTableReqs";
-            this.listViewTableReqs.Size = new System.Drawing.Size(596, 405);
+            this.listViewTableReqs.Size = new System.Drawing.Size(602, 405);
             this.listViewTableReqs.TabIndex = 1;
             this.listViewTableReqs.UseCompatibleStateImageBehavior = false;
             this.listViewTableReqs.View = System.Windows.Forms.View.Details;
             // 
             // columnProduct
             // 
-            this.columnProduct.Text = "Produto";
+            this.columnProduct.Text = "Product";
             this.columnProduct.Width = 362;
             // 
             // columnQuantity
             // 
-            this.columnQuantity.Text = "Quantidade";
+            this.columnQuantity.Text = "Quantity";
             this.columnQuantity.Width = 71;
             // 
             // columnUnitPrice
             // 
-            this.columnUnitPrice.Text = "Preço Unidade";
+            this.columnUnitPrice.Text = "Unit Price";
             this.columnUnitPrice.Width = 86;
             // 
             // columnPrice
             // 
-            this.columnPrice.Text = "Preço Total";
+            this.columnPrice.Text = "Price";
             this.columnPrice.Width = 73;
             // 
             // RegisterGUI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(755, 458);
+            this.ClientSize = new System.Drawing.Size(626, 453);
             this.Controls.Add(this.listViewTableReqs);
             this.Controls.Add(this.btnSetTablePaid);
             this.Controls.Add(this.comboBoxTable);
             this.Name = "RegisterGUI";
-            this.Text = "Form1";
+            this.Text = "Register";
             this.ResumeLayout(false);
 
         }

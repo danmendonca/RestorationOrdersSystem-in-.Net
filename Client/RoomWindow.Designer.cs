@@ -55,7 +55,7 @@
             this.btnMkReq.Name = "btnMkReq";
             this.btnMkReq.Size = new System.Drawing.Size(75, 23);
             this.btnMkReq.TabIndex = 2;
-            this.btnMkReq.Text = "Pedir";
+            this.btnMkReq.Text = "Request";
             this.btnMkReq.UseVisualStyleBackColor = true;
             this.btnMkReq.Click += new System.EventHandler(this.buttonMkReq_Click);
             // 
@@ -110,27 +110,27 @@
             // 
             // reqNumber
             // 
-            this.reqNumber.Text = "Pedido";
+            this.reqNumber.Text = "Request";
             this.reqNumber.Width = 58;
             // 
             // tableNr
             // 
-            this.tableNr.Text = "Mesa";
+            this.tableNr.Text = "Table";
             this.tableNr.Width = 48;
             // 
             // product
             // 
-            this.product.Text = "Producto";
+            this.product.Text = "Product";
             this.product.Width = 289;
             // 
             // quantity
             // 
-            this.quantity.Text = "Quantidade";
+            this.quantity.Text = "Quantity";
             this.quantity.Width = 73;
             // 
             // state
             // 
-            this.state.Text = "Estado";
+            this.state.Text = "State";
             this.state.Width = 71;
             // 
             // btnReqDelivered
@@ -139,7 +139,7 @@
             this.btnReqDelivered.Name = "btnReqDelivered";
             this.btnReqDelivered.Size = new System.Drawing.Size(117, 23);
             this.btnReqDelivered.TabIndex = 8;
-            this.btnReqDelivered.Text = "Pedido Entregue";
+            this.btnReqDelivered.Text = "Request Delivered";
             this.btnReqDelivered.UseVisualStyleBackColor = true;
             this.btnReqDelivered.Click += new System.EventHandler(this.btnReqDelivered_Click);
             // 
@@ -158,7 +158,7 @@
             this.Controls.Add(this.btnTableConsult);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Name = "RoomWindow";
-            this.Text = "Client";
+            this.Text = "Room";
             ((System.ComponentModel.ISupportInitialize)(this.spinnerQuantity)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
