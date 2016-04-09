@@ -1,2 +1,3 @@
 # RestorationOrdersSystem-in-.Net
-A System built in .Net framework that takes the orders from a room where the clients are and forwards them to their preparation location (either the kitchen or the bar for example), and alerts the staff when the request is ready to be delivered to the client and deals with the payment proccess.
+An application using .Net technology Remoting, simulating a restoration order system.
+In the system there may be multiple employees that use their own app and can take the clients orders in a room. Those requests are forwarded to either the bar or the kitchen, and each of them are responsible in their own apps to update the state of the order until it's ready, so the employee in the client room can set it as delivered. There is also a cash register application that allows to pay a table that has some requests, and a printer application that allows to see the invoice after payment, and consult the requests that are still to pay for a table.
