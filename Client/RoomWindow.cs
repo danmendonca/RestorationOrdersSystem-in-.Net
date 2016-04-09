@@ -185,13 +185,19 @@ public partial class RoomWindow : Form
 
         try
         {
-            ushort nrRequestDelivered = Convert.ToUInt16(listViewRequests.SelectedItems[0].SubItems[0].Text);
-            int tblNr = Convert.ToInt32(listViewRequests.SelectedItems[0].SubItems[1].Text);
-            registerServer.SetRequestDelivered(tblNr, nrRequestDelivered);
+            int requestLineIndex = listViewRequests.SelectedIndices[0];
+            RequestLine rl = _requestLines.ElementAt(requestLineIndex);
+
+            if (rl.RState != RequestState.Ready)
+                return;
+
+            ushort requestNr = rl.RequestNr;
+            int tblNr = rl.TableNr;
+            registerServer.SetRequestDelivered(tblNr, requestNr);
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Exception at RoomService:btnDelivered_Click \n" + ex.ToString());
+            Console.WriteLine("Exception at RoomService:btnReqDelivered_Click \n" + ex.ToString());
         }
     }
 
