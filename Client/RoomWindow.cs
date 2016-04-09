@@ -9,10 +9,10 @@ using System.Windows.Forms;
 public partial class RoomWindow : Form
 {
     #region Statics
-    private static String PTInProgress = "Preparação";
-    private static String PTReady = "Pronto";
-    private static String PTDelivered = "Entregue";
-    private static String PTWaiting = "Em espera";
+    private static String ENInProgress = "InProgress";
+    private static String ENReady = "Ready";
+    private static String ENDelivered = "Delivered";
+    private static String ENWaiting = "Waiting";
     private static int LISTVIEW_REQ_NR_INDEX = 0;
     private static int LISTVIEW_TABLE_INDEX = 1;
     private static int LISTVIEW_PRODUCT_INDEX = 2;
@@ -241,13 +241,13 @@ public partial class RoomWindow : Form
         switch (requestLine.RState)
         {
             case RequestState.InProgress:
-                return PTInProgress;
+                return ENInProgress;
             case RequestState.Delivered:
-                return PTDelivered;
+                return ENDelivered;
             case RequestState.Ready:
-                return PTReady;
+                return ENReady;
             default:
-                return PTWaiting;
+                return ENWaiting;
         }
     }
     #endregion
