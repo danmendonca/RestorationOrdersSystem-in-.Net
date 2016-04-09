@@ -22,7 +22,7 @@
   /// the contents of this method with the code editor.
   /// </summary>
   private void InitializeComponent() {
-            this.btnAskBill = new System.Windows.Forms.Button();
+            this.btnTableConsult = new System.Windows.Forms.Button();
             this.btnMkReq = new System.Windows.Forms.Button();
             this.comboBoxTable = new System.Windows.Forms.ComboBox();
             this.comboBoxProduct = new System.Windows.Forms.ComboBox();
@@ -38,16 +38,16 @@
             ((System.ComponentModel.ISupportInitialize)(this.spinnerQuantity)).BeginInit();
             this.SuspendLayout();
             // 
-            // btnAskBill
+            // btnTableConsult
             // 
-            this.btnAskBill.Location = new System.Drawing.Point(422, 9);
-            this.btnAskBill.Name = "btnAskBill";
-            this.btnAskBill.Size = new System.Drawing.Size(75, 23);
-            this.btnAskBill.TabIndex = 1;
-            this.btnAskBill.Text = "Pedir Conta";
-            this.btnAskBill.TextImageRelation = System.Windows.Forms.TextImageRelation.TextAboveImage;
-            this.btnAskBill.UseVisualStyleBackColor = true;
-            this.btnAskBill.Click += new System.EventHandler(this.btnAskBill_Click);
+            this.btnTableConsult.Location = new System.Drawing.Point(422, 9);
+            this.btnTableConsult.Name = "btnTableConsult";
+            this.btnTableConsult.Size = new System.Drawing.Size(75, 23);
+            this.btnTableConsult.TabIndex = 1;
+            this.btnTableConsult.Text = "Consult";
+            this.btnTableConsult.TextImageRelation = System.Windows.Forms.TextImageRelation.TextAboveImage;
+            this.btnTableConsult.UseVisualStyleBackColor = true;
+            this.btnTableConsult.Click += new System.EventHandler(this.btnTableConsult_Click);
             // 
             // btnMkReq
             // 
@@ -155,7 +155,7 @@
             this.Controls.Add(this.comboBoxProduct);
             this.Controls.Add(this.comboBoxTable);
             this.Controls.Add(this.btnMkReq);
-            this.Controls.Add(this.btnAskBill);
+            this.Controls.Add(this.btnTableConsult);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Name = "RoomWindow";
             this.Text = "Client";
@@ -166,7 +166,7 @@
   }
 
   #endregion
-  private System.Windows.Forms.Button btnAskBill;
+  private System.Windows.Forms.Button btnTableConsult;
   private System.Windows.Forms.Button btnMkReq;
     private System.Windows.Forms.ComboBox comboBoxTable;
     private System.Windows.Forms.ComboBox comboBoxProduct;

@@ -232,7 +232,6 @@ public class Table
 
 #region Room Service Delegates
 public delegate void RequestDelegate(RequestLine rl);
-//public delegate void RequestDeliveredDelegate(RequestLine rl);
 public delegate void NrTablesDelegate(ushort n);
 public delegate void ProductListDelegate(List<Product> lp);
 public delegate void TablePaidDelegate(int tableNr);
@@ -278,6 +277,7 @@ public interface ISingleServer
     event TablePaidDelegate TablePaidEvent;
     event BarKitchenDelegate barKitchenEvent;
     event InvoiceDelegate InvoiceEvent;
+    event InvoiceDelegate ConsultTableEvent;
     #endregion
 
 
@@ -291,7 +291,7 @@ public interface ISingleServer
     List<Table> GetTables();
     List<RequestLine> GetTableRLs(int selectedIndex);
     void MakeRequest(RequestLine rl);
-    bool RequestBill(ushort tableNr);
+    void ConsultTable(int tableNr);
     void SetRequestDelivered(int tblNr, ushort rNumber);
     void SetTablePaid(int tblNr);
     void UpdateRequestLineState(int tableNr, int requestNr);

@@ -158,7 +158,7 @@ public partial class RoomWindow : Form
 
 
 
-    #region RegisterDirectCalls
+    #region Button Handlers
     private void buttonMkReq_Click(object sender, EventArgs e)
     {
         string dsc = textBoxDescription.Text;
@@ -196,11 +196,11 @@ public partial class RoomWindow : Form
     }
 
 
-    private void btnAskBill_Click(object sender, EventArgs e)
+    private void btnTableConsult_Click(object sender, EventArgs e)
     {
         try
         {
-            registerServer.RequestBill((ushort)comboBoxTable.SelectedIndex);
+            registerServer.ConsultTable((ushort)comboBoxTable.SelectedIndex);
         }
         catch (Exception ex)
         {
@@ -211,9 +211,7 @@ public partial class RoomWindow : Form
 
 
 
-    #region Handlers
-
-
+    #region Event Handlers
     private void RoomProxy_rREvent(RequestLine rl)
     {
 

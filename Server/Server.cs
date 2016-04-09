@@ -44,6 +44,7 @@ public class SingleServer : MarshalByRefObject, ISingleServer
     public event BarKitchenDelegate barKitchenEvent;
     public event TablePaidDelegate TablePaidEvent;
     public event InvoiceDelegate InvoiceEvent;
+    public event InvoiceDelegate ConsultTableEvent;
     #endregion
 
 
@@ -153,6 +154,28 @@ public class SingleServer : MarshalByRefObject, ISingleServer
             }).Start();
         }
     }
+
+    private void TableConsultNotifier(List<RequestLine> tableRequests)
+    {
+        if (ConsultTableEvent == null)
+            return;
+
+        Delegate[] invkList = ConsultTableEvent.GetInvocationList();
+        foreach (InvoiceDelegate handler in invkList)
+        {
+            new Thread(() =>
+            {
+                try
+                {
+                    handler(tableRequests);
+                }
+                catch (Exception)
+                {
+                    InvoiceEvent -= handler;
+                }
+            }).Start();
+        }
+    }
     #endregion
 
 
@@ -207,21 +230,17 @@ public class SingleServer : MarshalByRefObject, ISingleServer
     }
 
 
-    bool ISingleServer.RequestBill(ushort tableNr)
+    void ISingleServer.ConsultTable(int tableNr)
     {
-        if (tableNr > NrTables || Tables.ElementAt(tableNr).TblState != TableStateID.Available)
-            return false;
+        if (tableNr > NrTables) return;
 
-        Tables.ElementAt(tableNr).changeState();
-        bills.Add(Tables.ElementAt(tableNr).getRequests());
-
-        return true;
+        TableConsultNotifier(Tables.ElementAt(tableNr).getRequests());
     }
 
     public void SetTablePaid(int t)
     {
         bills.Add(Tables.ElementAt(t).getRequests());
-        Tables.ElementAt(t).changeState();
+        //Tables.ElementAt(t).changeState();
 
         TableInvoiceNotifier(Tables.ElementAt(t).getRequests());
 
@@ -239,8 +258,6 @@ public class SingleServer : MarshalByRefObject, ISingleServer
             RequestNotifier(reqL);
             break;
         }
-
-
     }
     #endregion
 
