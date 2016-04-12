@@ -164,6 +164,7 @@
             this.stComboBox.Name = "stComboBox";
             this.stComboBox.Size = new System.Drawing.Size(82, 21);
             this.stComboBox.TabIndex = 0;
+            this.stComboBox.SelectedIndex = 0;
             // 
             // startAppBtn
             // 
