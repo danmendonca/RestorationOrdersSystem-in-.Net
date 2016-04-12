@@ -183,7 +183,7 @@ public class SingleServer : MarshalByRefObject, ISingleServer
     #region Interface Implementation
     void ISingleServer.MakeRequest(RequestLine aRl)
     {
-        
+
         if (aRl.TableNr > NrTables || Tables.ElementAt(aRl.TableNr).TblState != TableStateID.Available)
             return;
 
@@ -230,22 +230,30 @@ public class SingleServer : MarshalByRefObject, ISingleServer
     }
 
 
-    void ISingleServer.ConsultTable(int tableNr)
+    bool ISingleServer.ConsultTable(int tableNr)
     {
-        if (tableNr > NrTables) return;
+        if (tableNr > NrTables) return false;
+        if (Tables.ElementAt(tableNr).getRequests().Count < 1) return false;
 
         TableConsultNotifier(Tables.ElementAt(tableNr).getRequests());
+        return true;
     }
 
-    public void SetTablePaid(int t)
+    public bool SetTablePaid(int t)
     {
+        foreach (var item in Tables.ElementAt(t).getRequests())
+            if (item.RState != RequestState.Delivered) return false;
+
+        if (Tables.ElementAt(t).getRequests().Count < 1) return false;
+
         bills.Add(Tables.ElementAt(t).getRequests());
-        //Tables.ElementAt(t).changeState();
 
         TableInvoiceNotifier(Tables.ElementAt(t).getRequests());
 
         Tables.ElementAt(t).ClearRequests();
         TablePaymentNotifier(t);
+
+        return true;
     }
 
     void ISingleServer.SetRequestDelivered(int tblNr, ushort rNumber)

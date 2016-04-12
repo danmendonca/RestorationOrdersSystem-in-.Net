@@ -117,8 +117,20 @@ namespace RegisterGUI
         #region Handlers
         private void btnSetTablePaid_Click(object sender, EventArgs e)
         {
-            int selectedTable = comboBoxTable.SelectedIndex;
-            registerServer.SetTablePaid(selectedTable);
+            try
+            {
+                int selectedTable = comboBoxTable.SelectedIndex;
+                if (!(selectedTable >= 0)) return;
+
+                if (!registerServer.SetTablePaid(selectedTable))
+                    MessageBox.Show("Impossible to pay (No requests or to be delivered).", "Table Payment",
+    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            catch (Exception)
+            {
+
+            }
+
         }
 
         private void comboBoxTable_SelectedIndexChanged(object sender, EventArgs e)

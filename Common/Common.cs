@@ -292,9 +292,9 @@ public interface ISingleServer
     List<Table> GetTables();
     List<RequestLine> GetTableRLs(int selectedIndex);
     void MakeRequest(RequestLine rl);
-    void ConsultTable(int tableNr);
+    bool ConsultTable(int tableNr);
     void SetRequestDelivered(int tblNr, ushort rNumber);
-    void SetTablePaid(int tblNr);
+    bool SetTablePaid(int tblNr);
     void UpdateRequestLineState(int tableNr, int requestNr);
     #endregion
 }

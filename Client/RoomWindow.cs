@@ -67,6 +67,10 @@ public partial class RoomWindow : Form
         _requestLines = _requestLines.Concat(registerServer.GetNonDeliveredRequests()).ToList();
         RefreshListViewRequests();
 
+        comboBoxProduct.SelectedIndex = 0;
+        comboBoxTable.SelectedIndex = 0;
+        spinnerQuantity.Minimum = 1;
+        spinnerQuantity.Value = 1;
     }
     #endregion
 
@@ -154,6 +158,16 @@ public partial class RoomWindow : Form
             listViewRequests.Items.Add(lvi);
         }
     }
+
+    private void RefreshAfterRequest()
+    {
+        if (InvokeRequired) BeginInvoke((MethodInvoker)delegate { RefreshAfterRequest(); });
+        else
+        {
+            textBoxDescription.Text = "";
+            spinnerQuantity.Value = 1;
+        }
+    }
     #endregion
 
 
@@ -169,6 +183,7 @@ public partial class RoomWindow : Form
         try
         {
             registerServer.MakeRequest(rl);
+            RefreshAfterRequest();
         }
         catch (Exception ex)
         {
@@ -206,7 +221,9 @@ public partial class RoomWindow : Form
     {
         try
         {
-            registerServer.ConsultTable((ushort)comboBoxTable.SelectedIndex);
+            if(!registerServer.ConsultTable((ushort)comboBoxTable.SelectedIndex))
+                MessageBox.Show("This table has no requests to pay..", "Table Consult",
+    MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
         catch (Exception ex)
         {
